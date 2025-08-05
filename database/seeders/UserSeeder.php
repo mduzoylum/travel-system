@@ -21,6 +21,17 @@ class UserSeeder extends Seeder
             ]
         );
 
+        // New admin user
+        User::firstOrCreate(
+            ['email' => 'admin@admin.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('12345678'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
+
         // Firm users
         User::firstOrCreate(
             ['email' => 'ahmet@bizigo.com'],

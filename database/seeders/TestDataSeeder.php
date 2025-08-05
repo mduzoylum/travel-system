@@ -38,7 +38,7 @@ class TestDataSeeder extends Seeder
 
         $this->command->info('✅ Tüm test verileri başarıyla oluşturuldu!');
         $this->command->info('📊 Oluşturulan veriler:');
-        $this->command->info('   - Kullanıcılar: 8 adet');
+        $this->command->info('   - Kullanıcılar: 9 adet');
         $this->command->info('   - Firmalar: 3 adet');
         $this->command->info('   - Tedarikçiler: 4 adet');
         $this->command->info('   - Oteller: 9 adet');
@@ -50,6 +50,7 @@ class TestDataSeeder extends Seeder
         $this->command->info('');
         $this->command->info('🔑 Giriş bilgileri:');
         $this->command->info('   - Admin: admin@bizigo.com / password');
+        $this->command->info('   - Admin: admin@admin.com / 12345678');
         $this->command->info('   - Kullanıcı: ahmet@bizigo.com / password');
     }
 } 
