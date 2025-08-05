@@ -25,7 +25,7 @@ class HotelSeeder extends Seeder
                 'is_contracted' => true,
                 'supplier_id' => $otelBest->id,
                 'external_id' => 'IST001',
-                'image' => 'https://example.com/images/grand-istanbul.jpg',
+                'image' => 'https://via.placeholder.com/400x300/4A90E2/FFFFFF?text=Grand+Istanbul+Hotel',
                 'is_active' => true,
             ]
         );
@@ -40,7 +40,7 @@ class HotelSeeder extends Seeder
                 'is_contracted' => true,
                 'supplier_id' => $bookingPro->id,
                 'external_id' => 'IST002',
-                'image' => 'https://example.com/images/bosphorus-palace.jpg',
+                'image' => 'https://via.placeholder.com/400x300/50C878/FFFFFF?text=Bosphorus+Palace',
                 'is_active' => true,
             ]
         );
@@ -55,7 +55,7 @@ class HotelSeeder extends Seeder
                 'is_contracted' => true,
                 'supplier_id' => $otelBest->id,
                 'external_id' => 'IST003',
-                'image' => 'https://example.com/images/sultanahmet-boutique.jpg',
+                'image' => 'https://via.placeholder.com/400x300/FF6B35/FFFFFF?text=Sultanahmet+Boutique',
                 'is_active' => true,
             ]
         );
@@ -71,7 +71,7 @@ class HotelSeeder extends Seeder
                 'is_contracted' => true,
                 'supplier_id' => $hotelDirect->id,
                 'external_id' => 'ANT001',
-                'image' => 'https://example.com/images/mediterranean-resort.jpg',
+                'image' => 'https://via.placeholder.com/400x300/87CEEB/FFFFFF?text=Mediterranean+Resort',
                 'is_active' => true,
             ]
         );
@@ -86,7 +86,7 @@ class HotelSeeder extends Seeder
                 'is_contracted' => true,
                 'supplier_id' => $bookingPro->id,
                 'external_id' => 'ANT002',
-                'image' => 'https://example.com/images/kaleici-hotel.jpg',
+                'image' => 'https://via.placeholder.com/400x300/FFD700/FFFFFF?text=Kaleici+Hotel',
                 'is_active' => true,
             ]
         );
@@ -102,7 +102,7 @@ class HotelSeeder extends Seeder
                 'is_contracted' => true,
                 'supplier_id' => $otelBest->id,
                 'external_id' => 'NEV001',
-                'image' => 'https://example.com/images/cappadocia-cave.jpg',
+                'image' => 'https://via.placeholder.com/400x300/8B4513/FFFFFF?text=Cappadocia+Cave+Hotel',
                 'is_active' => true,
             ]
         );
@@ -118,7 +118,7 @@ class HotelSeeder extends Seeder
                 'is_contracted' => true,
                 'supplier_id' => $hotelDirect->id,
                 'external_id' => 'IZM001',
-                'image' => 'https://example.com/images/aegean-coast.jpg',
+                'image' => 'https://via.placeholder.com/400x300/4682B4/FFFFFF?text=Aegean+Coast+Hotel',
                 'is_active' => true,
             ]
         );
@@ -134,7 +134,7 @@ class HotelSeeder extends Seeder
                 'is_contracted' => true,
                 'supplier_id' => $bookingPro->id,
                 'external_id' => 'MUG001',
-                'image' => 'https://example.com/images/bodrum-marina.jpg',
+                'image' => 'https://via.placeholder.com/400x300/20B2AA/FFFFFF?text=Bodrum+Marina+Hotel',
                 'is_active' => true,
             ]
         );
@@ -150,7 +150,7 @@ class HotelSeeder extends Seeder
                 'is_contracted' => false,
                 'supplier_id' => null,
                 'external_id' => null,
-                'image' => null,
+                'image' => 'https://via.placeholder.com/400x300/808080/FFFFFF?text=Test+Hotel',
                 'is_active' => false,
             ]
         );
