@@ -64,14 +64,9 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="#" class="btn btn-sm btn-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-sm btn-warning">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    </div>
+                                    <a href="{{ route('admin.profits.calculations.show', $calculation) }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i> Detay
+                                    </a>
                                 </td>
                             </tr>
                             @endforeach

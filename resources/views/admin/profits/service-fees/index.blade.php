@@ -76,13 +76,13 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a href="#" class="btn btn-sm btn-info">
+                                        <a href="{{ route('admin.profits.service-fees.show', $fee) }}" class="btn btn-sm btn-info">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="#" class="btn btn-sm btn-warning">
+                                        <a href="{{ route('admin.profits.service-fees.edit', $fee) }}" class="btn btn-sm btn-warning">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="#" method="POST" class="d-inline">
+                                        <form action="{{ route('admin.profits.service-fees.destroy', $fee) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bu ücreti silmek istediğinizden emin misiniz?')">

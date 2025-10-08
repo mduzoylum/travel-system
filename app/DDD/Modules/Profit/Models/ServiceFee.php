@@ -9,7 +9,7 @@ class ServiceFee extends Model
 {
     protected $fillable = [
         'name', 'description', 'firm_id', 'service_type', 'fee_type',
-        'fee_value', 'min_amount', 'max_amount', 'currency', 'is_active', 'is_mandatory'
+        'fee_value', 'min_amount', 'max_amount', 'currency', 'is_active', 'is_mandatory', 'priority'
     ];
 
     protected $casts = [

@@ -148,6 +148,19 @@ class ApprovalController extends Controller
             ->with('success', 'Onay kuralı başarıyla eklendi.');
     }
 
+    public function destroyRule(ApprovalScenario $scenario, ApprovalRule $rule)
+    {
+        if ($rule->scenario_id !== $scenario->id) {
+            return redirect()->route('admin.approvals.rules', $scenario)
+                ->with('error', 'Bu kural bu senaryoya ait değil.');
+        }
+
+        $rule->delete();
+
+        return redirect()->route('admin.approvals.rules', $scenario)
+            ->with('success', 'Onay kuralı başarıyla silindi.');
+    }
+
     // Onay istekleri yönetimi
     public function requests()
     {

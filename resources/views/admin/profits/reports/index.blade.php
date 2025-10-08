@@ -151,7 +151,9 @@
                         <div class="card-body">
                             <h6 class="card-title">Aylık Kar Raporu</h6>
                             <p class="card-text">Bu ay için tüm firmaların kar performansını görüntüleyin.</p>
-                            <a href="#" class="btn btn-sm btn-primary">Görüntüle</a>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="generateMonthlyReport()">
+                                <i class="fas fa-chart-line"></i> Görüntüle
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -160,7 +162,9 @@
                         <div class="card-body">
                             <h6 class="card-title">Tedarikçi Bazlı Rapor</h6>
                             <p class="card-text">Tedarikçilere göre kar dağılımını analiz edin.</p>
-                            <a href="#" class="btn btn-sm btn-primary">Görüntüle</a>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="generateSupplierReport()">
+                                <i class="fas fa-chart-pie"></i> Görüntüle
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -168,4 +172,105 @@
         </div>
     </div>
 </div>
+
+<script>
+function generateMonthlyReport() {
+    // Bu ay için otomatik tarih aralığı belirle
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    // Form alanlarını otomatik doldur
+    document.getElementById('start_date').value = firstDay.toISOString().split('T')[0];
+    document.getElementById('end_date').value = lastDay.toISOString().split('T')[0];
+    
+    // İlk firmayı seç (eğer varsa)
+    const firmSelect = document.getElementById('firm_id');
+    if (firmSelect.options.length > 1) {
+        firmSelect.selectedIndex = 1; // İlk firma (index 0 boş seçenek)
+    }
+    
+    // CSRF token'ını al ve formu oluştur
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route("admin.profits.reports.generate") }}';
+    
+    // CSRF token ekle
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = '_token';
+    csrfToken.value = '{{ csrf_token() }}';
+    form.appendChild(csrfToken);
+    
+    // Form verilerini ekle
+    const firmId = document.createElement('input');
+    firmId.type = 'hidden';
+    firmId.name = 'firm_id';
+    firmId.value = firmSelect.value;
+    form.appendChild(firmId);
+    
+    const startDate = document.createElement('input');
+    startDate.type = 'hidden';
+    startDate.name = 'start_date';
+    startDate.value = firstDay.toISOString().split('T')[0];
+    form.appendChild(startDate);
+    
+    const endDate = document.createElement('input');
+    endDate.type = 'hidden';
+    endDate.name = 'end_date';
+    endDate.value = lastDay.toISOString().split('T')[0];
+    form.appendChild(endDate);
+    
+    // Formu sayfaya ekle ve gönder
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function generateSupplierReport() {
+    // Son 30 gün için otomatik tarih aralığı belirle
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+    
+    // İlk firmayı seç (eğer varsa)
+    const firmSelect = document.getElementById('firm_id');
+    if (firmSelect.options.length > 1) {
+        firmSelect.selectedIndex = 1; // İlk firma (index 0 boş seçenek)
+    }
+    
+    // CSRF token'ını al ve formu oluştur
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route("admin.profits.reports.generate") }}';
+    
+    // CSRF token ekle
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = '_token';
+    csrfToken.value = '{{ csrf_token() }}';
+    form.appendChild(csrfToken);
+    
+    // Form verilerini ekle
+    const firmId = document.createElement('input');
+    firmId.type = 'hidden';
+    firmId.name = 'firm_id';
+    firmId.value = firmSelect.value;
+    form.appendChild(firmId);
+    
+    const startDate = document.createElement('input');
+    startDate.type = 'hidden';
+    startDate.name = 'start_date';
+    startDate.value = thirtyDaysAgo.toISOString().split('T')[0];
+    form.appendChild(startDate);
+    
+    const endDate = document.createElement('input');
+    endDate.type = 'hidden';
+    endDate.name = 'end_date';
+    endDate.value = now.toISOString().split('T')[0];
+    form.appendChild(endDate);
+    
+    // Formu sayfaya ekle ve gönder
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
 @endsection 

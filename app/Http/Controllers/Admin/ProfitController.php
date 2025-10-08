@@ -51,8 +51,7 @@ class ProfitController extends Controller
             'min_fee' => 'nullable|numeric|min:0',
             'max_fee' => 'nullable|numeric|min:0',
             'tier_rules' => 'nullable|array',
-            'priority' => 'required|integer|min:0',
-            'is_active' => 'boolean'
+            'priority' => 'required|integer|min:0'
         ]);
 
         $data = $request->all();
@@ -92,8 +91,7 @@ class ProfitController extends Controller
             'min_fee' => 'nullable|numeric|min:0',
             'max_fee' => 'nullable|numeric|min:0',
             'tier_rules' => 'nullable|array',
-            'priority' => 'required|integer|min:0',
-            'is_active' => 'boolean'
+            'priority' => 'required|integer|min:0'
         ]);
 
         $data = $request->all();
@@ -101,7 +99,7 @@ class ProfitController extends Controller
 
         $profitRule->update($data);
 
-        return redirect()->route('admin.profits.index')
+        return redirect()->route('admin.profits.show', $profitRule)
             ->with('success', 'Kar kuralı başarıyla güncellendi.');
     }
 
@@ -139,8 +137,7 @@ class ProfitController extends Controller
             'min_amount' => 'nullable|numeric|min:0',
             'max_amount' => 'nullable|numeric|min:0',
             'currency' => 'required|string|max:3',
-            'is_active' => 'boolean',
-            'is_mandatory' => 'boolean'
+            'priority' => 'nullable|integer|min:0'
         ]);
 
         $data = $request->all();
@@ -153,6 +150,50 @@ class ProfitController extends Controller
             ->with('success', 'Servis ücreti başarıyla oluşturuldu.');
     }
 
+    public function showServiceFee(ServiceFee $serviceFee)
+    {
+        $serviceFee->load('firm');
+        return view('admin.profits.service-fees.show', compact('serviceFee'));
+    }
+
+    public function editServiceFee(ServiceFee $serviceFee)
+    {
+        $firms = Firm::where('is_active', true)->get();
+        return view('admin.profits.service-fees.edit', compact('serviceFee', 'firms'));
+    }
+
+    public function updateServiceFee(Request $request, ServiceFee $serviceFee)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'firm_id' => 'nullable|exists:firms,id',
+            'service_type' => 'required|in:reservation,cancellation,modification,booking',
+            'fee_type' => 'required|in:percentage,fixed',
+            'fee_value' => 'required|numeric|min:0',
+            'min_amount' => 'nullable|numeric|min:0',
+            'max_amount' => 'nullable|numeric|min:0',
+            'currency' => 'required|string|max:3',
+            'priority' => 'nullable|integer|min:0'
+        ]);
+
+        $data = $request->all();
+        $data['is_active'] = $request->has('is_active');
+        $data['is_mandatory'] = $request->has('is_mandatory');
+
+        $serviceFee->update($data);
+
+        return redirect()->route('admin.profits.service-fees.show', $serviceFee)
+            ->with('success', 'Servis ücreti başarıyla güncellendi.');
+    }
+
+    public function destroyServiceFee(ServiceFee $serviceFee)
+    {
+        $serviceFee->delete();
+        return redirect()->route('admin.profits.service-fees')
+            ->with('success', 'Servis ücreti başarıyla silindi.');
+    }
+
     // Kar hesaplamaları
     public function calculations()
     {
@@ -160,6 +201,12 @@ class ProfitController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
         return view('admin.profits.calculations.index', compact('calculations'));
+    }
+
+    public function showCalculation(ProfitCalculation $calculation)
+    {
+        $calculation->load(['firm', 'supplier', 'contract']);
+        return view('admin.profits.calculations.show', compact('calculation'));
     }
 
     public function calculate(Request $request)
