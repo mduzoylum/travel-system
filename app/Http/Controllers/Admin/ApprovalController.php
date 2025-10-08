@@ -25,7 +25,7 @@ class ApprovalController extends Controller
     public function create()
     {
         $firms = Firm::where('is_active', true)->get();
-        $users = User::where('is_active', true)->get();
+        $users = User::all();
         return view('admin.approvals.create', compact('firms', 'users'));
     }
 
@@ -81,7 +81,7 @@ class ApprovalController extends Controller
     public function edit(ApprovalScenario $scenario)
     {
         $firms = Firm::where('is_active', true)->get();
-        $users = User::where('is_active', true)->get();
+        $users = User::all();
         return view('admin.approvals.edit', compact('scenario', 'firms', 'users'));
     }
 
@@ -131,18 +131,13 @@ class ApprovalController extends Controller
             'field_name' => 'required|string|max:100',
             'operator' => 'required|in:equals,not_equals,greater_than,less_than,between,in,not_in',
             'value' => 'required',
-            'priority' => 'required|integer|min:0',
-            'is_active' => 'boolean'
+            'priority' => 'required|integer|min:0'
         ]);
 
-        $scenario->rules()->create([
-            'rule_type' => $request->rule_type,
-            'field_name' => $request->field_name,
-            'operator' => $request->operator,
-            'value' => $request->value,
-            'priority' => $request->priority,
-            'is_active' => $request->has('is_active')
-        ]);
+        $data = $request->only(['rule_type', 'field_name', 'operator', 'value', 'priority']);
+        $data['is_active'] = $request->has('is_active');
+
+        $scenario->rules()->create($data);
 
         return redirect()->route('admin.approvals.rules', $scenario)
             ->with('success', 'Onay kuralı başarıyla eklendi.');
