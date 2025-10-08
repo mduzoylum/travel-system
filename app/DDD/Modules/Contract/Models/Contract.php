@@ -8,7 +8,7 @@ class Contract extends Model
 {
     protected $fillable = [
         'hotel_id', 'firm_id', 'start_date', 'end_date', 'currency', 'is_active',
-        'base_price', 'commission_rate', 'service_fee', 'description', 'auto_renewal', 'payment_terms'
+        'base_price', 'commission_rate', 'description', 'auto_renewal', 'payment_terms'
     ];
 
     protected $casts = [
@@ -17,8 +17,7 @@ class Contract extends Model
         'is_active' => 'boolean',
         'auto_renewal' => 'boolean',
         'base_price' => 'decimal:2',
-        'commission_rate' => 'decimal:2',
-        'service_fee' => 'decimal:2'
+        'commission_rate' => 'decimal:2'
     ];
 
     public function hotel()
@@ -103,5 +102,75 @@ class Contract extends Model
             default:
                 return 'bg-success';
         }
+    }
+
+    /**
+     * Bu kontrat genel kontrat mı? (tüm firmalara geçerli)
+     */
+    public function isGeneralContract(): bool
+    {
+        return $this->firm_id === null;
+    }
+
+    /**
+     * Bu kontrat firmaya özel mi?
+     */
+    public function isFirmSpecific(): bool
+    {
+        return $this->firm_id !== null;
+    }
+
+    /**
+     * Kontrat tipini string olarak döndür
+     */
+    public function getContractType(): string
+    {
+        return $this->isGeneralContract() ? 'Genel Kontrat' : 'Firmaya Özel';
+    }
+
+    /**
+     * Kontrat adını döndür (görüntüleme için)
+     */
+    public function getDisplayName(): string
+    {
+        if ($this->isGeneralContract()) {
+            return '🌍 Genel Kontrat - ' . $this->hotel->name;
+        }
+        
+        return $this->firm->name . ' - ' . $this->hotel->name;
+    }
+
+    /**
+     * Scope: Genel kontratları getir
+     */
+    public function scopeGeneral($query)
+    {
+        return $query->whereNull('firm_id');
+    }
+
+    /**
+     * Scope: Firmaya özel kontratları getir
+     */
+    public function scopeFirmSpecific($query, ?int $firmId = null)
+    {
+        $query = $query->whereNotNull('firm_id');
+        
+        if ($firmId !== null) {
+            $query->where('firm_id', $firmId);
+        }
+        
+        return $query;
+    }
+
+    /**
+     * Scope: Aktif ve geçerli kontratları getir
+     */
+    public function scopeActiveAndValid($query, ?string $date = null)
+    {
+        $checkDate = $date ?? now();
+        
+        return $query->where('is_active', true)
+            ->where('start_date', '<=', $checkDate)
+            ->where('end_date', '>=', $checkDate);
     }
 }

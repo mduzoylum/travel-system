@@ -15,6 +15,12 @@ class Firm extends Model
         'tax_number',
         'email_domain',
         'is_active',
+        'service_fee',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'service_fee' => 'decimal:2',
     ];
 
     public function firmUsers()

@@ -30,32 +30,43 @@ class ContractController extends Controller
     {
         $request->validate([
             'hotel_id' => 'required|exists:hotels,id',
-            'firm_id' => 'required|exists:firms,id',
+            'firm_id' => 'nullable|sometimes|exists:firms,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'currency' => 'required|in:TRY,USD,EUR,GBP',
             'base_price' => 'required|numeric|min:0',
             'commission_rate' => 'required|numeric|min:0|max:100',
-            'service_fee' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
-            'is_active' => 'boolean',
-            'auto_renewal' => 'boolean',
             'payment_terms' => 'nullable|string|max:100'
         ]);
 
         $data = $request->all();
         $data['is_active'] = $request->has('is_active');
         $data['auto_renewal'] = $request->has('auto_renewal');
+        
+        // Boş string gönderilirse null yap
+        if ($request->firm_id === '' || $request->firm_id === 'general') {
+            $data['firm_id'] = null;
+        }
 
         // Aynı otel ve firma için aktif kontrat var mı kontrol et
-        $existingContract = Contract::where('hotel_id', $request->hotel_id)
-            ->where('firm_id', $request->firm_id)
-            ->where('is_active', true)
-            ->first();
+        $query = Contract::where('hotel_id', $request->hotel_id)
+            ->where('is_active', true);
+        
+        if ($data['firm_id']) {
+            // Firmaya özel kontrat kontrolü
+            $query->where('firm_id', $data['firm_id']);
+        } else {
+            // Genel kontrat kontrolü (firm_id null)
+            $query->whereNull('firm_id');
+        }
+        
+        $existingContract = $query->first();
 
         if ($existingContract) {
+            $firmName = $data['firm_id'] ? 'firma' : 'genel';
             return back()->withInput()
-                ->with('error', 'Bu otel ve firma için zaten aktif bir kontrat bulunmaktadır.');
+                ->with('error', "Bu otel için zaten aktif bir {$firmName} kontrat bulunmaktadır.");
         }
 
         $contract = Contract::create($data);
@@ -81,33 +92,48 @@ class ContractController extends Controller
     {
         $request->validate([
             'hotel_id' => 'required|exists:hotels,id',
-            'firm_id' => 'required|exists:firms,id',
+            'firm_id' => 'nullable|sometimes|exists:firms,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'currency' => 'required|in:TRY,USD,EUR,GBP',
             'base_price' => 'required|numeric|min:0',
             'commission_rate' => 'required|numeric|min:0|max:100',
-            'service_fee' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
-            'is_active' => 'boolean',
-            'auto_renewal' => 'boolean',
             'payment_terms' => 'nullable|string|max:100'
+        ], [
+            'firm_id.exists' => 'Seçilen firma bulunamadı.',
+            'hotel_id.exists' => 'Seçilen otel bulunamadı.',
+            'end_date.after' => 'Bitiş tarihi başlangıç tarihinden sonra olmalıdır.'
         ]);
 
         $data = $request->all();
         $data['is_active'] = $request->has('is_active');
         $data['auto_renewal'] = $request->has('auto_renewal');
+        
+        // Boş string gönderilirse null yap
+        if ($request->firm_id === '' || $request->firm_id === 'general') {
+            $data['firm_id'] = null;
+        }
 
         // Aynı otel ve firma için başka aktif kontrat var mı kontrol et (kendisi hariç)
-        $existingContract = Contract::where('hotel_id', $request->hotel_id)
-            ->where('firm_id', $request->firm_id)
+        $query = Contract::where('hotel_id', $request->hotel_id)
             ->where('is_active', true)
-            ->where('id', '!=', $contract->id)
-            ->first();
+            ->where('id', '!=', $contract->id);
+        
+        if ($data['firm_id']) {
+            // Firmaya özel kontrat kontrolü
+            $query->where('firm_id', $data['firm_id']);
+        } else {
+            // Genel kontrat kontrolü (firm_id null)
+            $query->whereNull('firm_id');
+        }
+        
+        $existingContract = $query->first();
 
         if ($existingContract) {
+            $firmName = $data['firm_id'] ? 'firma' : 'genel';
             return back()->withInput()
-                ->with('error', 'Bu otel ve firma için zaten aktif bir kontrat bulunmaktadır.');
+                ->with('error', "Bu otel için zaten aktif bir {$firmName} kontrat bulunmaktadır.");
         }
 
         $contract->update($data);

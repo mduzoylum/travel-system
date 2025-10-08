@@ -71,7 +71,7 @@
             </div>
             
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="mb-3">
                         <label for="tax_number" class="form-label">Vergi Numarası</label>
                         <input type="text" class="form-control @error('tax_number') is-invalid @enderror" 
@@ -82,7 +82,19 @@
                     </div>
                 </div>
                 
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="service_fee" class="form-label">Servis Bedeli (TL)</label>
+                        <input type="number" step="0.01" min="0" class="form-control @error('service_fee') is-invalid @enderror" 
+                               id="service_fee" name="service_fee" value="{{ old('service_fee', 0) }}">
+                        <small class="form-text text-muted">Bu firmanın tüm rezervasyonlarına uygulanacak servis bedeli</small>
+                        @error('service_fee')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
                     <div class="mb-3">
                         <label for="is_active" class="form-label">Durum</label>
                         <select class="form-select @error('is_active') is-invalid @enderror" 

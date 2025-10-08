@@ -43,7 +43,12 @@
                             <tr>
                                 <td><strong>Firma:</strong></td>
                                 <td>
-                                    <strong>{{ $contract->firm->name ?? 'Firma bulunamadı' }}</strong>
+                                    @if($contract->firm)
+                                        <strong>{{ $contract->firm->name }}</strong>
+                                    @else
+                                        <strong>🌍 Genel Kontrat</strong>
+                                        <br><small class="text-muted">Tüm firmalara geçerli</small>
+                                    @endif
                                     @if($contract->auto_renewal)
                                         <br><span class="badge bg-info">Otomatik Yenileme</span>
                                     @endif
@@ -121,12 +126,6 @@
                         <div class="text-center">
                             <h6 class="text-muted">Komisyon Oranı</h6>
                             <h4 class="text-info">{{ $contract->commission_rate }}%</h4>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <h6 class="text-muted">Servis Ücreti</h6>
-                            <h4 class="text-warning">{{ number_format($contract->service_fee ?? 0, 2) }} {{ $contract->currency }}</h4>
                         </div>
                     </div>
                     <div class="col-md-3">

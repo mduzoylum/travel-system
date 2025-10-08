@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class FirmUser extends Model
 {
-    protected $fillable = ['firm_id', 'user_id', 'role', 'department'];
+    protected $fillable = ['firm_id', 'user_id', 'role', 'department', 'service_fee'];
+
+    protected $casts = [
+        'service_fee' => 'decimal:2',
+    ];
 
     public function firm()
     {

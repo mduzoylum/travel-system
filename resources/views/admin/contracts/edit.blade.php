@@ -10,6 +10,31 @@
     </a>
 </div>
 
+<!-- Debug: Validation Hataları -->
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <h5>Validation Hataları:</h5>
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<!-- Debug: Flash Mesajları -->
+@if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+
 <div class="row">
     <div class="col-md-8">
         <div class="card">
@@ -40,10 +65,12 @@
                         
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="firm_id" class="form-label">Firma *</label>
+                                <label for="firm_id" class="form-label">Firma</label>
                                 <select class="form-select @error('firm_id') is-invalid @enderror" 
-                                        id="firm_id" name="firm_id" required>
-                                    <option value="">Firma Seçiniz</option>
+                                        id="firm_id" name="firm_id">
+                                    <option value="" {{ old('firm_id', $contract->firm_id) == null ? 'selected' : '' }}>
+                                        🌍 Genel Kontrat (Tüm Firmalar)
+                                    </option>
                                     @foreach($firms as $firm)
                                         <option value="{{ $firm->id }}" 
                                                 {{ old('firm_id', $contract->firm_id) == $firm->id ? 'selected' : '' }}>
@@ -51,6 +78,9 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <small class="form-text text-muted">
+                                    Boş bırakırsanız tüm firmalara geçerli genel kontrat olur
+                                </small>
                                 @error('firm_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -127,19 +157,7 @@
                     </div>
                     
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="service_fee" class="form-label">Servis Ücreti</label>
-                                <input type="number" step="0.01" min="0" class="form-control @error('service_fee') is-invalid @enderror" 
-                                       id="service_fee" name="service_fee" 
-                                       value="{{ old('service_fee', $contract->service_fee) }}">
-                                @error('service_fee')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="mb-3">
                                 <label for="payment_terms" class="form-label">Ödeme Koşulları</label>
                                 <input type="text" class="form-control @error('payment_terms') is-invalid @enderror" 
@@ -256,13 +274,6 @@
                         <span class="input-group-text" id="currency_symbol2">{{ $contract->currency }}</span>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Servis Ücreti:</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="display_service_fee" readonly>
-                        <span class="input-group-text" id="currency_symbol3">{{ $contract->currency }}</span>
-                    </div>
-                </div>
                 <hr>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Toplam Satış Fiyatı:</label>
@@ -313,12 +324,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     const basePriceInput = document.getElementById('base_price');
     const commissionInput = document.getElementById('commission_rate');
-    const serviceFeeInput = document.getElementById('service_fee');
     const currencySelect = document.getElementById('currency');
     
     const displayBasePrice = document.getElementById('display_base_price');
     const displayCommission = document.getElementById('display_commission');
-    const displayServiceFee = document.getElementById('display_service_fee');
     const displaySalePrice = document.getElementById('display_sale_price');
     
     // Para birimi sembolleri
@@ -341,21 +350,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculatePrices() {
         const basePrice = parseFloat(basePriceInput.value) || 0;
         const commissionRate = parseFloat(commissionInput.value) || 0;
-        const serviceFee = parseFloat(serviceFeeInput.value) || 0;
         
         const commission = (basePrice * commissionRate / 100);
-        const salePrice = basePrice + commission + serviceFee;
+        const salePrice = basePrice + commission;
         
         displayBasePrice.value = basePrice.toFixed(2);
         displayCommission.value = commission.toFixed(2);
-        displayServiceFee.value = serviceFee.toFixed(2);
         displaySalePrice.value = salePrice.toFixed(2);
     }
     
     // Event listeners
     basePriceInput.addEventListener('input', calculatePrices);
     commissionInput.addEventListener('input', calculatePrices);
-    serviceFeeInput.addEventListener('input', calculatePrices);
     currencySelect.addEventListener('change', updateCurrencySymbols);
     
     // Tarih validasyonu

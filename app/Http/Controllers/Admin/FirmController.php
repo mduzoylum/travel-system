@@ -28,6 +28,7 @@ class FirmController extends Controller
             'address' => 'nullable|string',
             'tax_number' => 'nullable|string|max:50',
             'contact_person' => 'nullable|string|max:255',
+            'service_fee' => 'nullable|numeric|min:0',
             'is_active' => 'boolean'
         ]);
 
@@ -60,6 +61,7 @@ class FirmController extends Controller
             'address' => 'nullable|string',
             'tax_number' => 'nullable|string|max:50',
             'contact_person' => 'nullable|string|max:255',
+            'service_fee' => 'nullable|numeric|min:0',
             'is_active' => 'boolean'
         ]);
 

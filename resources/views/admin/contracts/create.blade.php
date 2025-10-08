@@ -37,10 +37,10 @@
                         
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="firm_id" class="form-label">Firma *</label>
+                                <label for="firm_id" class="form-label">Firma</label>
                                 <select class="form-select @error('firm_id') is-invalid @enderror" 
-                                        id="firm_id" name="firm_id" required>
-                                    <option value="">Firma Seçiniz</option>
+                                        id="firm_id" name="firm_id">
+                                    <option value="">🌍 Genel Kontrat (Tüm Firmalar)</option>
                                     @foreach($firms as $firm)
                                         <option value="{{ $firm->id }}" 
                                                 {{ old('firm_id') == $firm->id ? 'selected' : '' }}>
@@ -48,6 +48,9 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <small class="form-text text-muted">
+                                    Boş bırakırsanız tüm firmalara geçerli genel kontrat oluşturulur
+                                </small>
                                 @error('firm_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -120,18 +123,7 @@
                     </div>
                     
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="service_fee" class="form-label">Servis Ücreti</label>
-                                <input type="number" step="0.01" min="0" class="form-control @error('service_fee') is-invalid @enderror" 
-                                       id="service_fee" name="service_fee" value="{{ old('service_fee') }}">
-                                @error('service_fee')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="mb-3">
                                 <label for="payment_terms" class="form-label">Ödeme Koşulları</label>
                                 <input type="text" class="form-control @error('payment_terms') is-invalid @enderror" 

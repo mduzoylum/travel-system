@@ -108,7 +108,8 @@
                                         <br><span class="badge bg-info">Otomatik Yenileme</span>
                                     @endif
                                 @else
-                                    <span class="text-danger">Firma bulunamadı</span>
+                                    <strong>🌍 Genel Kontrat</strong>
+                                    <br><small class="text-muted">Tüm firmalar</small>
                                 @endif
                             </td>
                             <td>
