@@ -14,14 +14,10 @@ class UserController extends Controller
 {
     public function index()
     {
-        return view('admin.dashboard');
-    }
-
-    public function users()
-    {
         $users = User::with('firmUser.firm')->orderBy('created_at', 'desc')->paginate(15);
         return view('admin.users.index', compact('users'));
     }
+
 
     public function create()
     {
@@ -37,9 +33,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:admin,user,manager',
             'phone' => 'nullable|string|max:20',
-            'firm_id' => 'nullable|exists:firms,id',
-            'is_active' => 'boolean',
-            'email_verified_at' => 'nullable|date'
+            'firm_id' => 'nullable|exists:firms,id'
         ]);
 
         $user = User::create([
@@ -49,7 +43,7 @@ class UserController extends Controller
             'role' => $request->role,
             'phone' => $request->phone,
             'is_active' => $request->has('is_active'),
-            'email_verified_at' => $request->email_verified_at ? now() : null
+            'email_verified_at' => $request->has('email_verified_at') ? now() : null
         ]);
 
         // Eğer firma seçilmişse firm user ilişkisini oluştur
@@ -68,7 +62,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        $user->load(['firmUser.firm', 'firmUser.accessRules']);
+        $user->load(['firmUser.firm']);
         return view('admin.users.show', compact('user'));
     }
 
@@ -86,9 +80,7 @@ class UserController extends Controller
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|in:admin,user,manager',
             'phone' => 'nullable|string|max:20',
-            'firm_id' => 'nullable|exists:firms,id',
-            'is_active' => 'boolean',
-            'email_verified_at' => 'nullable|date'
+            'firm_id' => 'nullable|exists:firms,id'
         ]);
 
         $data = [
@@ -97,7 +89,7 @@ class UserController extends Controller
             'role' => $request->role,
             'phone' => $request->phone,
             'is_active' => $request->has('is_active'),
-            'email_verified_at' => $request->email_verified_at ? now() : null
+            'email_verified_at' => $request->has('email_verified_at') ? now() : null
         ];
 
         // Şifre sadece değiştirilmişse güncelle

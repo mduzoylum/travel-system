@@ -138,24 +138,46 @@
 @push('scripts')
 <script>
 function toggleUserStatus(userId) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfToken) {
+        alert('CSRF token bulunamadı. Sayfayı yenileyin.');
+        return;
+    }
+
+    // Butonu devre dışı bırak
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
     fetch(`/admin/users/${userId}/toggle-status`, {
         method: 'POST',
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
             'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             location.reload();
         } else {
-            alert('Hata: ' + data.message);
+            alert('Hata: ' + (data.message || 'Bilinmeyen hata'));
         }
     })
     .catch(error => {
-        alert('İşlem sırasında hata oluştu.');
+        console.error('Toggle status error:', error);
+        alert('İşlem sırasında hata oluştu: ' + error.message);
+        button.disabled = false;
+        button.innerHTML = originalText;
     });
 }
 </script>
 @endpush
+
