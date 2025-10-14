@@ -27,18 +27,39 @@
                 
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="type" class="form-label">Tedarikçi Türü *</label>
-                        <select class="form-select @error('type') is-invalid @enderror" 
-                                id="type" name="type" required>
-                            <option value="">Tür Seçiniz</option>
-                            <option value="hotel" {{ old('type') == 'hotel' ? 'selected' : '' }}>Otel</option>
-                            <option value="flight" {{ old('type') == 'flight' ? 'selected' : '' }}>Uçuş</option>
-                            <option value="car" {{ old('type') == 'car' ? 'selected' : '' }}>Araç Kiralama</option>
-                            <option value="activity" {{ old('type') == 'activity' ? 'selected' : '' }}>Aktivite</option>
-                            <option value="transfer" {{ old('type') == 'transfer' ? 'selected' : '' }}>Transfer</option>
-                        </select>
-                        @error('type')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <label for="types" class="form-label">Tedarikçi Türleri *</label>
+                        <div class="form-check-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="type_hotel" name="types[]" value="hotel"
+                                       {{ in_array('hotel', old('types', [])) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="type_hotel">Otel</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="type_flight" name="types[]" value="flight"
+                                       {{ in_array('flight', old('types', [])) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="type_flight">Uçuş</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="type_car" name="types[]" value="car"
+                                       {{ in_array('car', old('types', [])) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="type_car">Araç Kiralama</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="type_activity" name="types[]" value="activity"
+                                       {{ in_array('activity', old('types', [])) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="type_activity">Aktivite</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="type_transfer" name="types[]" value="transfer"
+                                       {{ in_array('transfer', old('types', [])) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="type_transfer">Transfer</label>
+                            </div>
+                        </div>
+                        @error('types')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                        @error('types.*')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>

@@ -10,7 +10,7 @@ class Supplier extends Model
 {
     protected $fillable = [
         'name',
-        'type',
+        'types',
         'description',
         'api_endpoint',
         'api_version',
@@ -22,6 +22,7 @@ class Supplier extends Model
     ];
 
     protected $casts = [
+        'types' => 'array',
         'api_credentials' => 'array',
         'is_active' => 'boolean',
         'sync_enabled' => 'boolean',
@@ -43,9 +44,14 @@ class Supplier extends Model
         return $this->hasMany(\App\DDD\Modules\Reservation\Models\Reservation::class);
     }
 
-    public function getType(): SupplierType
+    public function getTypes(): array
     {
-        return new SupplierType($this->type);
+        return $this->types ?? [];
+    }
+
+    public function getFirstType(): ?string
+    {
+        return !empty($this->types) ? $this->types[0] : null;
     }
 
     public function getApiCredentials(): ApiCredentials
@@ -53,9 +59,57 @@ class Supplier extends Model
         return new ApiCredentials($this->api_credentials);
     }
 
+    public function hasType(string $type): bool
+    {
+        return in_array($type, $this->types ?? []);
+    }
+
     public function isOtelBest(): bool
     {
-        return $this->type === 'otelbest';
+        return $this->hasType('otelbest');
+    }
+
+    public function isHotel(): bool
+    {
+        return $this->hasType('hotel');
+    }
+
+    public function isFlight(): bool
+    {
+        return $this->hasType('flight');
+    }
+
+    public function isCar(): bool
+    {
+        return $this->hasType('car');
+    }
+
+    public function isActivity(): bool
+    {
+        return $this->hasType('activity');
+    }
+
+    public function isTransfer(): bool
+    {
+        return $this->hasType('transfer');
+    }
+
+    public function getTypesLabel(): string
+    {
+        $typeLabels = [
+            'hotel' => 'Otel',
+            'flight' => 'Uçuş',
+            'car' => 'Araç Kiralama',
+            'activity' => 'Aktivite',
+            'transfer' => 'Transfer'
+        ];
+
+        $labels = [];
+        foreach ($this->types ?? [] as $type) {
+            $labels[] = $typeLabels[$type] ?? ucfirst($type);
+        }
+
+        return implode(', ', $labels);
     }
 
     public function isApiEnabled(): bool

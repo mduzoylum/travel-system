@@ -36,7 +36,8 @@ class SupplierController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|string|in:hotel,flight,car,activity,transfer',
+            'types' => 'required|array|min:1',
+            'types.*' => 'required|string|in:hotel,flight,car,activity,transfer',
             'description' => 'nullable|string',
             'api_endpoint' => 'nullable|url',
             'api_version' => 'nullable|string|max:20',
@@ -51,7 +52,7 @@ class SupplierController extends Controller
         // Sadece izin verilen alanları al
         $data = [
             'name' => $request->name,
-            'type' => $request->type,
+            'types' => $request->types,
             'description' => $request->description,
             'api_endpoint' => $request->api_endpoint,
             'api_version' => $request->api_version,
@@ -109,7 +110,8 @@ class SupplierController extends Controller
         
         $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|string|in:hotel,flight,car,activity,transfer',
+            'types' => 'required|array|min:1',
+            'types.*' => 'required|string|in:hotel,flight,car,activity,transfer',
             'description' => 'nullable|string',
             'api_endpoint' => 'nullable|url',
             'api_version' => 'nullable|string|max:20',
@@ -131,7 +133,7 @@ class SupplierController extends Controller
         // Sadece izin verilen alanları al
         $data = [
             'name' => $request->name,
-            'type' => $request->type,
+            'types' => $request->types,
             'description' => $request->description,
             'api_endpoint' => $request->api_endpoint,
             'api_version' => $request->api_version,

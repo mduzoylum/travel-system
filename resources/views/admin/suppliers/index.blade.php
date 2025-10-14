@@ -36,7 +36,13 @@
                                 @endif
                             </td>
                             <td>
-                                <span class="badge bg-info">{{ $supplier->type }}</span>
+                                @if($supplier->types && count($supplier->types) > 0)
+                                    @foreach($supplier->types as $type)
+                                        <span class="badge bg-info me-1">{{ ucfirst($type) }}</span>
+                                    @endforeach
+                                @else
+                                    <span class="text-muted">Tip belirtilmemiş</span>
+                                @endif
                             </td>
                             <td>
                                 @if($supplier->api_url)
