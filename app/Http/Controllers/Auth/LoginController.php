@@ -23,7 +23,9 @@ class LoginController extends Controller
             // Role bazlı yönlendirme
             return match ($user->role) {
                 'admin' => redirect()->route('admin.dashboard'),
-                default => redirect('/'),
+                'supplier' => redirect()->route('admin.suppliers.index'), // Tedarikçi kullanıcılar
+                'user' => redirect()->route('admin.suppliers.index'), // Normal kullanıcılar
+                default => redirect()->route('admin.suppliers.index'),
             };
         }
 

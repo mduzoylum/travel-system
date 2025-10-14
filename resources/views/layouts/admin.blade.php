@@ -179,61 +179,80 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
-                            <i class="fas fa-tachometer-alt me-1"></i>
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-file-contract me-1"></i>
-                            Kontrat Modülü
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('admin.hotels.index') }}"><i class="fas fa-hotel"></i> Oteller</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.contracts.index') }}"><i class="fas fa-handshake"></i> Kontratlar</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.suppliers.index') }}"><i class="fas fa-truck"></i> Tedarikçiler</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-credit-card me-1"></i>
-                            Kredi Sistemi
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('admin.credits.index') }}"><i class="fas fa-wallet"></i> Kredi Hesapları</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.firms.index') }}"><i class="fas fa-building"></i> Firmalar</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-check-circle me-1"></i>
-                            Onay Sistemi
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('admin.approvals.index') }}"><i class="fas fa-cogs"></i> Onay Senaryoları</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.approval-requests.index') }}"><i class="fas fa-clipboard-list"></i> Onay İstekleri</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-chart-line me-1"></i>
-                            Kar Sistemi
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('admin.profits.index') }}"><i class="fas fa-coins"></i> Kar Kuralları</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.profits.service-fees') }}"><i class="fas fa-percentage"></i> Servis Ücretleri</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.profits.calculations') }}"><i class="fas fa-calculator"></i> Kar Hesaplamaları</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.profits.reports') }}"><i class="fas fa-chart-bar"></i> Kar Raporları</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
-                            <i class="fas fa-users me-1"></i>
-                            Kullanıcılar
-                        </a>
-                    </li>
+                    @if(auth()->user()->isAdmin())
+                        {{-- Admin Menüsü --}}
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-1"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-file-contract me-1"></i>
+                                Kontrat Modülü
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('admin.hotels.index') }}"><i class="fas fa-hotel"></i> Oteller</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.contracts.index') }}"><i class="fas fa-handshake"></i> Kontratlar</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.suppliers.index') }}"><i class="fas fa-truck"></i> Tedarikçiler</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-credit-card me-1"></i>
+                                Kredi Sistemi
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('admin.credits.index') }}"><i class="fas fa-wallet"></i> Kredi Hesapları</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.firms.index') }}"><i class="fas fa-building"></i> Firmalar</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Onay Sistemi
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('admin.approvals.index') }}"><i class="fas fa-cogs"></i> Onay Senaryoları</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.approval-requests.index') }}"><i class="fas fa-clipboard-list"></i> Onay İstekleri</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-chart-line me-1"></i>
+                                Kar Sistemi
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('admin.profits.index') }}"><i class="fas fa-coins"></i> Kar Kuralları</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.profits.service-fees') }}"><i class="fas fa-percentage"></i> Servis Ücretleri</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.profits.calculations') }}"><i class="fas fa-calculator"></i> Kar Hesaplamaları</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.profits.reports') }}"><i class="fas fa-chart-bar"></i> Kar Raporları</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                                <i class="fas fa-users me-1"></i>
+                                Kullanıcılar
+                            </a>
+                        </li>
+                    @elseif(auth()->user()->isSupplier())
+                        {{-- Tedarikçi Kullanıcı Menüsü --}}
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.suppliers.*') ? 'active' : '' }}" href="{{ route('admin.suppliers.index') }}">
+                                <i class="fas fa-truck me-1"></i>
+                                Tedarikçiler
+                            </a>
+                        </li>
+                    @else
+                        {{-- Normal Kullanıcı Menüsü --}}
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.suppliers.*') ? 'active' : '' }}" href="{{ route('admin.suppliers.index') }}">
+                                <i class="fas fa-truck me-1"></i>
+                                Tedarikçiler
+                            </a>
+                        </li>
+                    @endif
                 </ul>
                 <ul class="navbar-nav">
                     @auth

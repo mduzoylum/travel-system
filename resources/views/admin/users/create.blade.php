@@ -69,9 +69,10 @@
                                 <select class="form-select @error('role') is-invalid @enderror" 
                                         id="role" name="role" required>
                                     <option value="">Rol Seçiniz</option>
-                                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>Manager</option>
-                                    <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
+                                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>👨‍💼 Admin</option>
+                                    <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>👔 Manager</option>
+                                    <option value="supplier" {{ old('role') == 'supplier' ? 'selected' : '' }}>🚚 Tedarikçi</option>
+                                    <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>👤 Kullanıcı</option>
                                 </select>
                                 @error('role')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -164,9 +165,10 @@
                 <div class="alert alert-info">
                     <h6><i class="fas fa-info-circle"></i> Rol Açıklamaları</h6>
                     <ul class="mb-0">
-                        <li><strong>Admin:</strong> Tam sistem yönetimi</li>
-                        <li><strong>Manager:</strong> Kısıtlı yönetim yetkileri</li>
-                        <li><strong>User:</strong> Temel kullanıcı yetkileri</li>
+                        <li><strong>👨‍💼 Admin:</strong> Tam sistem yönetimi</li>
+                        <li><strong>👔 Manager:</strong> Kısıtlı yönetim yetkileri</li>
+                        <li><strong>🚚 Tedarikçi:</strong> Tedarikçi yönetim yetkileri</li>
+                        <li><strong>👤 Kullanıcı:</strong> Temel kullanıcı yetkileri</li>
                     </ul>
                 </div>
                 

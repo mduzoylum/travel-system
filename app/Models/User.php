@@ -84,10 +84,46 @@ class User extends Authenticatable
     }
 
     /**
+     * Kullanıcının rolü supplier mi?
+     */
+    public function isSupplier(): bool
+    {
+        return $this->role === 'supplier';
+    }
+
+    /**
      * Kullanıcının e-postası doğrulanmış mı?
      */
     public function isEmailVerified(): bool
     {
         return !is_null($this->email_verified_at);
+    }
+
+    /**
+     * Rol badge rengini al
+     */
+    public function getRoleBadgeColor(): string
+    {
+        return match($this->role) {
+            'admin' => 'danger',
+            'manager' => 'warning',
+            'supplier' => 'info',
+            'user' => 'success',
+            default => 'secondary'
+        };
+    }
+
+    /**
+     * Rol ismini al
+     */
+    public function getRoleLabel(): string
+    {
+        return match($this->role) {
+            'admin' => 'Admin',
+            'manager' => 'Manager',
+            'supplier' => 'Tedarikçi',
+            'user' => 'Kullanıcı',
+            default => 'Bilinmiyor'
+        };
     }
 }

@@ -24,6 +24,7 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// Admin Only Routes (Sadece Admin Erişebilir)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [UserController::class, 'index'])->name('dashboard');
     
@@ -53,11 +54,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Firms
     Route::resource('firms', FirmController::class);
     
-    // Suppliers
-    Route::resource('suppliers', SupplierController::class);
-    Route::post('suppliers/{supplier}/sync', [SupplierController::class, 'sync'])->name('suppliers.sync');
-    Route::post('suppliers/{supplier}/test-connection', [SupplierController::class, 'testConnection'])->name('suppliers.test-connection');
-    
     // Approvals
     // Not: 'requests' route'u resource'tan ÖNCE olmalı (çakışma olmasın diye)
     Route::get('approval-requests', [ApprovalController::class, 'requests'])->name('approval-requests.index');
@@ -85,6 +81,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('reports/generate', [ProfitController::class, 'generateReport'])->name('reports.generate');
     });
     Route::resource('profits', ProfitController::class)->parameters(['profits' => 'profitRule']);
+});
+
+// Authenticated Routes (Tüm Giriş Yapmış Kullanıcılar Erişebilir)
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // Suppliers - Normal kullanıcılar sadece API olmayan tedarikçileri görebilir
+    Route::get('suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+    Route::get('suppliers/create', [SupplierController::class, 'create'])->name('suppliers.create');
+    Route::post('suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+    Route::get('suppliers/{supplier}', [SupplierController::class, 'show'])->name('suppliers.show');
+    Route::get('suppliers/{supplier}/edit', [SupplierController::class, 'edit'])->name('suppliers.edit');
+    Route::put('suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
+    Route::delete('suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
+    Route::post('suppliers/{supplier}/sync', [SupplierController::class, 'sync'])->name('suppliers.sync');
+    Route::post('suppliers/{supplier}/test-connection', [SupplierController::class, 'testConnection'])->name('suppliers.test-connection');
 });
 
 Route::get('/dummy', function () {

@@ -53,14 +53,20 @@
                 @enderror
             </div>
             
+            @if(auth()->user()->isAdmin())
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>API Entegrasyon Ayarları</strong> - Bu alanlar sadece admin kullanıcılar tarafından düzenlenebilir.
+            </div>
+            
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="api_url" class="form-label">API URL</label>
-                        <input type="url" class="form-control @error('api_url') is-invalid @enderror" 
-                               id="api_url" name="api_url" value="{{ old('api_url') }}" 
+                        <label for="api_endpoint" class="form-label">API URL</label>
+                        <input type="url" class="form-control @error('api_endpoint') is-invalid @enderror" 
+                               id="api_endpoint" name="api_endpoint" value="{{ old('api_endpoint') }}" 
                                placeholder="https://api.example.com">
-                        @error('api_url')
+                        @error('api_endpoint')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -143,6 +149,7 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+            @endif
             
             <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary">

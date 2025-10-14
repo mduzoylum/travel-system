@@ -14,7 +14,16 @@ class SupplierController extends Controller
 {
     public function index()
     {
-        $suppliers = Supplier::orderBy('created_at', 'desc')->paginate(15);
+        // Admin olmayan kullanıcılar için API entegrasyonu olmayan tedarikçileri göster
+        if (!auth()->user()->isAdmin()) {
+            $suppliers = Supplier::whereNull('api_endpoint')
+                ->whereNull('api_credentials')
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+        } else {
+            $suppliers = Supplier::orderBy('created_at', 'desc')->paginate(15);
+        }
+        
         return view('admin.suppliers.index', compact('suppliers'));
     }
 
@@ -29,29 +38,45 @@ class SupplierController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:hotel,flight,car,activity,transfer',
             'description' => 'nullable|string',
-            'api_url' => 'nullable|url',
-            'api_version' => 'nullable|string|max:10',
+            'api_endpoint' => 'nullable|url',
+            'api_version' => 'nullable|string|max:20',
             'api_username' => 'nullable|string|max:100',
             'api_password' => 'nullable|string|max:100',
             'api_key' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
-            'sync_frequency' => 'nullable|string|in:hourly,daily,weekly,manual'
+            'sync_frequency' => 'nullable|string',
+            'is_active' => 'nullable|in:on,1,true',
+            'sync_enabled' => 'nullable|in:on,1,true'
         ]);
 
-        $data = $request->all();
-        $data['is_active'] = $request->has('is_active');
+        // Sadece izin verilen alanları al
+        $data = [
+            'name' => $request->name,
+            'type' => $request->type,
+            'description' => $request->description,
+            'api_endpoint' => $request->api_endpoint,
+            'api_version' => $request->api_version,
+            'sync_frequency' => $request->sync_frequency,
+            'is_active' => $request->has('is_active'),
+            'sync_enabled' => $request->has('sync_enabled'),
+        ];
 
         // API credentials'ı JSON olarak sakla
         $apiCredentials = [];
-        if ($request->api_username) $apiCredentials['username'] = $request->api_username;
-        if ($request->api_password) $apiCredentials['password'] = $request->api_password;
-        if ($request->api_key) $apiCredentials['api_key'] = $request->api_key;
+        if ($request->api_username) {
+            $apiCredentials['username'] = $request->api_username;
+        }
+        if ($request->api_password) {
+            $apiCredentials['password'] = $request->api_password;
+        }
+        if ($request->api_key) {
+            $apiCredentials['api_key'] = $request->api_key;
+        }
         
-        $data['api_credentials'] = !empty($apiCredentials) ? json_encode($apiCredentials) : null;
+        $data['api_credentials'] = !empty($apiCredentials) ? $apiCredentials : null;
 
-        Supplier::create($data);
+        $supplier = Supplier::create($data);
 
-        return redirect()->route('admin.suppliers.index')
+        return redirect()->route('admin.suppliers.show', $supplier)
             ->with('success', 'Tedarikçi başarıyla eklendi.');
     }
 
@@ -63,51 +88,93 @@ class SupplierController extends Controller
 
     public function edit(Supplier $supplier)
     {
+        // API entegrasyonu olan tedarikçileri sadece admin düzenleyebilir
+        if ($supplier->api_endpoint || $supplier->api_credentials) {
+            if (!auth()->user()->isAdmin()) {
+                abort(403, 'API entegrasyonu olan tedarikçileri sadece admin kullanıcılar düzenleyebilir.');
+            }
+        }
+        
         return view('admin.suppliers.edit', compact('supplier'));
     }
 
     public function update(Request $request, Supplier $supplier)
     {
+        // API entegrasyonu olan tedarikçileri sadece admin güncelleyebilir
+        if ($supplier->api_endpoint || $supplier->api_credentials) {
+            if (!auth()->user()->isAdmin()) {
+                abort(403, 'API entegrasyonu olan tedarikçileri sadece admin kullanıcılar güncelleyebilir.');
+            }
+        }
+        
         $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:hotel,flight,car,activity,transfer',
             'description' => 'nullable|string',
-            'api_url' => 'nullable|url',
-            'api_version' => 'nullable|string|max:10',
+            'api_endpoint' => 'nullable|url',
+            'api_version' => 'nullable|string|max:20',
             'api_username' => 'nullable|string|max:100',
             'api_password' => 'nullable|string|max:100',
             'api_key' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
-            'sync_frequency' => 'nullable|string|in:hourly,daily,weekly,manual'
+            'sync_frequency' => 'nullable|string',
+            'is_active' => 'nullable|in:on,1,true',
+            'sync_enabled' => 'nullable|in:on,1,true'
         ]);
 
-        $data = $request->all();
-        $data['is_active'] = $request->has('is_active');
+        // Debug: Form verilerini logla
+        Log::info('Supplier update request data:', $request->all());
+        Log::info('is_active checkbox: ' . ($request->has('is_active') ? 'checked' : 'unchecked'));
+        Log::info('sync_enabled checkbox: ' . ($request->has('sync_enabled') ? 'checked' : 'unchecked'));
+        Log::info('Final is_active value: ' . ($request->has('is_active') ? 'true' : 'false'));
+        Log::info('Final sync_enabled value: ' . ($request->has('sync_enabled') ? 'true' : 'false'));
+
+        // Sadece izin verilen alanları al
+        $data = [
+            'name' => $request->name,
+            'type' => $request->type,
+            'description' => $request->description,
+            'api_endpoint' => $request->api_endpoint,
+            'api_version' => $request->api_version,
+            'sync_frequency' => $request->sync_frequency,
+            'is_active' => $request->has('is_active'),
+            'sync_enabled' => $request->has('sync_enabled'),
+        ];
 
         // API credentials'ı JSON olarak sakla
         $apiCredentials = [];
-        if ($request->api_username) $apiCredentials['username'] = $request->api_username;
-        if ($request->api_password) $apiCredentials['password'] = $request->api_password;
-        if ($request->api_key) $apiCredentials['api_key'] = $request->api_key;
-        
-        // Şifre değiştirilmemişse mevcut şifreyi koru
-        if (!$request->api_password && $supplier->api_credentials) {
+        if ($request->api_username) {
+            $apiCredentials['username'] = $request->api_username;
+        }
+        if ($request->api_password) {
+            $apiCredentials['password'] = $request->api_password;
+        } elseif (!$request->api_password && $supplier->api_credentials) {
+            // Şifre değiştirilmemişse mevcut şifreyi koru
             $existingCredentials = json_decode($supplier->api_credentials, true);
             if (isset($existingCredentials['password'])) {
                 $apiCredentials['password'] = $existingCredentials['password'];
             }
         }
+        if ($request->api_key) {
+            $apiCredentials['api_key'] = $request->api_key;
+        }
         
-        $data['api_credentials'] = !empty($apiCredentials) ? json_encode($apiCredentials) : null;
+        $data['api_credentials'] = !empty($apiCredentials) ? $apiCredentials : null;
 
         $supplier->update($data);
 
-        return redirect()->route('admin.suppliers.index')
+        return redirect()->route('admin.suppliers.show', $supplier)
             ->with('success', 'Tedarikçi başarıyla güncellendi.');
     }
 
     public function destroy(Supplier $supplier)
     {
+        // API entegrasyonu olan tedarikçileri sadece admin silebilir
+        if ($supplier->api_endpoint || $supplier->api_credentials) {
+            if (!auth()->user()->isAdmin()) {
+                abort(403, 'API entegrasyonu olan tedarikçileri sadece admin kullanıcılar silebilir.');
+            }
+        }
+        
         $supplier->delete();
 
         return redirect()->route('admin.suppliers.index')
@@ -118,7 +185,7 @@ class SupplierController extends Controller
     {
         try {
             // Mock API servisini kullan
-            $apiService = new MockApiService($supplier->api_url ?? 'https://mock-api.example.com');
+            $apiService = new MockApiService($supplier->api_endpoint ?? 'https://mock-api.example.com');
             
             $result = $apiService->getHotels();
             
@@ -167,7 +234,7 @@ class SupplierController extends Controller
     {
         try {
             // Mock API servisini kullan
-            $apiService = new MockApiService($supplier->api_url ?? 'https://mock-api.example.com');
+            $apiService = new MockApiService($supplier->api_endpoint ?? 'https://mock-api.example.com');
             
             $result = $apiService->testConnection();
             

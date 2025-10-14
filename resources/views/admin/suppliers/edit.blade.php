@@ -59,14 +59,20 @@
                 @enderror
             </div>
             
+            @if(auth()->user()->isAdmin())
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>API Entegrasyon Ayarları</strong> - Bu alanlar sadece admin kullanıcılar tarafından düzenlenebilir.
+            </div>
+            
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="api_url" class="form-label">API URL</label>
-                        <input type="url" class="form-control @error('api_url') is-invalid @enderror" 
-                               id="api_url" name="api_url" value="{{ old('api_url', $supplier->api_url) }}" 
+                        <label for="api_endpoint" class="form-label">API URL</label>
+                        <input type="url" class="form-control @error('api_endpoint') is-invalid @enderror" 
+                               id="api_endpoint" name="api_endpoint" value="{{ old('api_endpoint', $supplier->api_endpoint) }}" 
                                placeholder="https://api.example.com">
-                        @error('api_url')
+                        @error('api_endpoint')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -90,7 +96,7 @@
                     <div class="mb-3">
                         <label for="api_username" class="form-label">API Kullanıcı Adı</label>
                         <input type="text" class="form-control @error('api_username') is-invalid @enderror" 
-                               id="api_username" name="api_username" value="{{ old('api_username', $supplier->api_username) }}">
+                               id="api_username" name="api_username" value="{{ old('api_username', $supplier->api_credentials['username'] ?? '') }}">
                         @error('api_username')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -116,26 +122,13 @@
                     <div class="mb-3">
                         <label for="api_key" class="form-label">API Anahtarı</label>
                         <input type="text" class="form-control @error('api_key') is-invalid @enderror" 
-                               id="api_key" name="api_key" value="{{ old('api_key', $supplier->api_key) }}">
+                               id="api_key" name="api_key" value="{{ old('api_key', $supplier->api_credentials['api_key'] ?? '') }}">
                         @error('api_key')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
                 
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="is_active" class="form-label">Durum</label>
-                        <select class="form-select @error('is_active') is-invalid @enderror" 
-                                id="is_active" name="is_active">
-                            <option value="1" {{ old('is_active', $supplier->is_active) == '1' ? 'selected' : '' }}>Aktif</option>
-                            <option value="0" {{ old('is_active', $supplier->is_active) == '0' ? 'selected' : '' }}>Pasif</option>
-                        </select>
-                        @error('is_active')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
             </div>
             
             <div class="mb-3">
@@ -150,6 +143,28 @@
                 @error('sync_frequency')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
+            </div>
+            
+            @endif
+            
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1"
+                           {{ old('is_active', $supplier->is_active) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="is_active">
+                        Aktif Durumda
+                    </label>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="sync_enabled" name="sync_enabled" value="1"
+                           {{ old('sync_enabled', $supplier->sync_enabled) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="sync_enabled">
+                        Senkronizasyon Etkin
+                    </label>
+                </div>
             </div>
             
             <div class="d-flex justify-content-end">

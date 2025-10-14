@@ -63,9 +63,10 @@
                                 <select class="form-select @error('role') is-invalid @enderror" 
                                         id="role" name="role" required>
                                     <option value="">Rol Seçiniz</option>
-                                    <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="manager" {{ old('role', $user->role) == 'manager' ? 'selected' : '' }}>Manager</option>
-                                    <option value="user" {{ old('role', $user->role) == 'user' ? 'selected' : '' }}>User</option>
+                                    <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>👨‍💼 Admin</option>
+                                    <option value="manager" {{ old('role', $user->role) == 'manager' ? 'selected' : '' }}>👔 Manager</option>
+                                    <option value="supplier" {{ old('role', $user->role) == 'supplier' ? 'selected' : '' }}>🚚 Tedarikçi</option>
+                                    <option value="user" {{ old('role', $user->role) == 'user' ? 'selected' : '' }}>👤 Kullanıcı</option>
                                 </select>
                                 @error('role')
                                     <div class="invalid-feedback">{{ $message }}</div>

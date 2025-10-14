@@ -15,8 +15,18 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || auth()->user()->role !== 'admin') {
-            return redirect('/login')->with('error', 'Bu sayfaya erişim yetkiniz yok!');
+        if (!auth()->check()) {
+            return redirect('/login')->with('error', 'Lütfen giriş yapın.');
+        }
+        
+        if (auth()->user()->role !== 'admin') {
+            // Eğer AJAX request ise JSON dön
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Bu işlem için yetkiniz yok.'], 403);
+            }
+            
+            // Normal request ise geriye yönlendir ve logout yapma
+            return back()->with('error', 'Bu sayfaya erişim yetkiniz yok! Sadece admin kullanıcılar erişebilir.');
         }
 
         return $next($request);

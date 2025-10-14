@@ -48,13 +48,9 @@
                                 @endif
                             </td>
                             <td>
-                                @if($user->role === 'admin')
-                                    <span class="badge bg-danger">Admin</span>
-                                @elseif($user->role === 'manager')
-                                    <span class="badge bg-warning">Manager</span>
-                                @else
-                                    <span class="badge bg-secondary">User</span>
-                                @endif
+                                <span class="badge bg-{{ $user->getRoleBadgeColor() }}">
+                                    {{ $user->getRoleLabel() }}
+                                </span>
                             </td>
                             <td>
                                 @if($user->firmUser && $user->firmUser->firm)

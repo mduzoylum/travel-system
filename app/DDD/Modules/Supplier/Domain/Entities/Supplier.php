@@ -11,8 +11,11 @@ class Supplier extends Model
     protected $fillable = [
         'name',
         'type',
+        'description',
         'api_endpoint',
+        'api_version',
         'api_credentials',
+        'sync_frequency',
         'is_active',
         'sync_enabled',
         'last_sync_at'
