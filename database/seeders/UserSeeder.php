@@ -32,6 +32,17 @@ class UserSeeder extends Seeder
             ]
         );
 
+        // Supplier user
+        User::firstOrCreate(
+            ['email' => 'neslihan@gmail.com'],
+            [
+                'name' => 'Neslihan',
+                'password' => Hash::make('12345678'),
+                'role' => 'supplier',
+                'email_verified_at' => now(),
+            ]
+        );
+
         // Firm users
         User::firstOrCreate(
             ['email' => 'ahmet@bizigo.com'],
