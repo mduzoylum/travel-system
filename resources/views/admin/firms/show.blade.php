@@ -59,6 +59,16 @@
                                     @endif
                                 </td>
                             </tr>
+                            <tr>
+                                <th>E-posta Domaini:</th>
+                                <td>
+                                    @if($firm->email_domain)
+                                        <code>{{ $firm->email_domain }}</code>
+                                    @else
+                                        <span class="text-muted">Belirtilmemiş</span>
+                                    @endif
+                                </td>
+                            </tr>
                         </table>
                     </div>
                     <div class="col-md-6">

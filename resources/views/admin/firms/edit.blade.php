@@ -67,6 +67,21 @@
                 </div>
             </div>
             
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="email_domain" class="form-label">E-posta Domaini</label>
+                        <input type="text" class="form-control @error('email_domain') is-invalid @enderror" 
+                               id="email_domain" name="email_domain" value="{{ old('email_domain', $firm->email_domain) }}" 
+                               placeholder="example.com">
+                        <small class="form-text text-muted">Firma e-posta domaini (örn: example.com)</small>
+                        @error('email_domain')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            
             <div class="mb-3">
                 <label for="address" class="form-label">Adres</label>
                 <textarea class="form-control @error('address') is-invalid @enderror" 

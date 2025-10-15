@@ -28,8 +28,19 @@ class FirmController extends Controller
             'address' => 'nullable|string',
             'tax_number' => 'nullable|string|max:50',
             'contact_person' => 'nullable|string|max:255',
+            'email_domain' => 'nullable|string|max:100',
             'service_fee' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean'
+            'is_active' => 'nullable|in:on,1,true'
+        ], [
+            'name.required' => 'Firma adı zorunludur.',
+            'email.email' => 'Geçerli bir e-posta adresi giriniz.',
+            'email.unique' => 'Bu e-posta adresi zaten kullanılmaktadır.',
+            'phone.max' => 'Telefon numarası en fazla 20 karakter olabilir.',
+            'tax_number.max' => 'Vergi numarası en fazla 50 karakter olabilir.',
+            'contact_person.max' => 'İletişim kişisi adı en fazla 255 karakter olabilir.',
+            'email_domain.max' => 'E-posta domaini en fazla 100 karakter olabilir.',
+            'service_fee.numeric' => 'Hizmet bedeli sayı olmalıdır.',
+            'service_fee.min' => 'Hizmet bedeli 0\'dan küçük olamaz.'
         ]);
 
         $data = $request->all();
@@ -61,8 +72,19 @@ class FirmController extends Controller
             'address' => 'nullable|string',
             'tax_number' => 'nullable|string|max:50',
             'contact_person' => 'nullable|string|max:255',
+            'email_domain' => 'nullable|string|max:100',
             'service_fee' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean'
+            'is_active' => 'nullable|in:on,1,true'
+        ], [
+            'name.required' => 'Firma adı zorunludur.',
+            'email.email' => 'Geçerli bir e-posta adresi giriniz.',
+            'email.unique' => 'Bu e-posta adresi zaten kullanılmaktadır.',
+            'phone.max' => 'Telefon numarası en fazla 20 karakter olabilir.',
+            'tax_number.max' => 'Vergi numarası en fazla 50 karakter olabilir.',
+            'contact_person.max' => 'İletişim kişisi adı en fazla 255 karakter olabilir.',
+            'email_domain.max' => 'E-posta domaini en fazla 100 karakter olabilir.',
+            'service_fee.numeric' => 'Hizmet bedeli sayı olmalıdır.',
+            'service_fee.min' => 'Hizmet bedeli 0\'dan küçük olamaz.'
         ]);
 
         $data = $request->all();
