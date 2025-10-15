@@ -38,6 +38,17 @@
             <h6 class="m-0 font-weight-bold text-primary">Onay Senaryosu Bilgileri</h6>
         </div>
         <div class="card-body">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Lütfen aşağıdaki hataları düzeltin:</h6>
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form action="{{ route('admin.approvals.update', $scenario) }}" method="POST">
                 @csrf
                 @method('PUT')

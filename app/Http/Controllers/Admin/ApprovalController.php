@@ -37,13 +37,32 @@ class ApprovalController extends Controller
             'firm_id' => 'required|exists:firms,id',
             'approval_type' => 'required|in:single,multi_step,parallel',
             'max_approval_days' => 'required|integer|min:1|max:30',
-            'require_all_approvers' => 'boolean',
+            'require_all_approvers' => 'nullable|in:on,1,true',
             'notification_settings' => 'nullable|array',
             'approvers' => 'required|array|min:1',
             'approvers.*.user_id' => 'required|exists:users,id',
             'approvers.*.step_order' => 'required|integer|min:1',
             'approvers.*.approval_type' => 'required|in:required,optional,backup',
-            'approvers.*.can_override' => 'boolean'
+            'approvers.*.can_override' => 'nullable|in:on,1,true'
+        ], [
+            'name.required' => 'Senaryo adı zorunludur.',
+            'firm_id.required' => 'Firma seçimi zorunludur.',
+            'firm_id.exists' => 'Seçilen firma bulunamadı.',
+            'approval_type.required' => 'Onay tipi seçimi zorunludur.',
+            'approval_type.in' => 'Geçersiz onay tipi.',
+            'max_approval_days.required' => 'Maksimum onay günü zorunludur.',
+            'max_approval_days.integer' => 'Maksimum onay günü sayı olmalıdır.',
+            'max_approval_days.min' => 'Maksimum onay günü en az 1 olmalıdır.',
+            'max_approval_days.max' => 'Maksimum onay günü en fazla 30 olabilir.',
+            'approvers.required' => 'En az bir onaylayıcı seçilmelidir.',
+            'approvers.min' => 'En az bir onaylayıcı seçilmelidir.',
+            'approvers.*.user_id.required' => 'Onaylayıcı seçimi zorunludur.',
+            'approvers.*.user_id.exists' => 'Seçilen kullanıcı bulunamadı.',
+            'approvers.*.step_order.required' => 'Sıra numarası zorunludur.',
+            'approvers.*.step_order.integer' => 'Sıra numarası sayı olmalıdır.',
+            'approvers.*.step_order.min' => 'Sıra numarası en az 1 olmalıdır.',
+            'approvers.*.approval_type.required' => 'Onay tipi seçimi zorunludur.',
+            'approvers.*.approval_type.in' => 'Geçersiz onay tipi.'
         ]);
 
         $scenario = ApprovalScenario::create([
@@ -93,8 +112,18 @@ class ApprovalController extends Controller
             'firm_id' => 'required|exists:firms,id',
             'approval_type' => 'required|in:single,multi_step,parallel',
             'max_approval_days' => 'required|integer|min:1|max:30',
-            'require_all_approvers' => 'boolean',
+            'require_all_approvers' => 'nullable|in:on,1,true',
             'notification_settings' => 'nullable|array'
+        ], [
+            'name.required' => 'Senaryo adı zorunludur.',
+            'firm_id.required' => 'Firma seçimi zorunludur.',
+            'firm_id.exists' => 'Seçilen firma bulunamadı.',
+            'approval_type.required' => 'Onay tipi seçimi zorunludur.',
+            'approval_type.in' => 'Geçersiz onay tipi.',
+            'max_approval_days.required' => 'Maksimum onay günü zorunludur.',
+            'max_approval_days.integer' => 'Maksimum onay günü sayı olmalıdır.',
+            'max_approval_days.min' => 'Maksimum onay günü en az 1 olmalıdır.',
+            'max_approval_days.max' => 'Maksimum onay günü en fazla 30 olabilir.'
         ]);
 
         $scenario->update([
@@ -131,7 +160,20 @@ class ApprovalController extends Controller
             'field_name' => 'required|string|max:100',
             'operator' => 'required|in:equals,not_equals,greater_than,less_than,between,in,not_in',
             'value' => 'required',
-            'priority' => 'required|integer|min:0'
+            'priority' => 'required|integer|min:0',
+            'is_active' => 'nullable|in:on,1,true'
+        ], [
+            'rule_type.required' => 'Kural tipi zorunludur.',
+            'rule_type.in' => 'Geçersiz kural tipi.',
+            'field_name.required' => 'Alan adı zorunludur.',
+            'field_name.string' => 'Alan adı metin olmalıdır.',
+            'field_name.max' => 'Alan adı en fazla 100 karakter olabilir.',
+            'operator.required' => 'Operatör seçimi zorunludur.',
+            'operator.in' => 'Geçersiz operatör.',
+            'value.required' => 'Değer zorunludur.',
+            'priority.required' => 'Öncelik zorunludur.',
+            'priority.integer' => 'Öncelik sayı olmalıdır.',
+            'priority.min' => 'Öncelik en az 0 olmalıdır.'
         ]);
 
         $data = $request->only(['rule_type', 'field_name', 'operator', 'value', 'priority']);
