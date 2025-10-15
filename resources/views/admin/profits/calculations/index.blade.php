@@ -96,6 +96,22 @@
             <form action="{{ route('admin.profits.calculate') }}" method="POST">
                 @csrf
                 <div class="modal-body">
+                    <!-- Hesaplama Modu Seçimi -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <label class="form-label">Hesaplama Modu *</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="calculation_mode" id="mode_estimated" value="estimated" checked>
+                                <label class="btn btn-outline-primary" for="mode_estimated">Ön Görülen Fiyat</label>
+                                
+                                <input type="radio" class="btn-check" name="calculation_mode" id="mode_existing" value="existing">
+                                <label class="btn btn-outline-primary" for="mode_existing">Mevcut Ürün</label>
+                            </div>
+                            <small class="form-text text-muted">Ön görülen fiyat: Girilen fiyata göre kar hesaplama | Mevcut ürün: Sistemdeki ürünlerden fiyat kontrolü</small>
+                        </div>
+                    </div>
+
+                    <!-- Firma Seçimi (Her iki modda da zorunlu) -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -108,20 +124,86 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        
+                        <!-- Ön Görülen Fiyat Modu - Ürün Tipi -->
+                        <div class="col-md-6" id="product_type_field">
                             <div class="mb-3">
-                                <label for="supplier_id" class="form-label">Tedarikçi</label>
-                                <select class="form-select" id="supplier_id" name="supplier_id">
-                                    <option value="">Tedarikçi Seçin</option>
-                                    @foreach(\App\DDD\Modules\Supplier\Domain\Entities\Supplier::where('is_active', true)->get() as $supplier)
-                                        <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                <label for="product_type" class="form-label">Ürün Tipi *</label>
+                                <select class="form-select" id="product_type" name="product_type">
+                                    <option value="">Ürün Tipi Seçin</option>
+                                    <option value="hotel">Otel</option>
+                                    <option value="flight">Uçak</option>
+                                    <option value="car">Araç Kiralama</option>
+                                    <option value="activity">Aktivite</option>
+                                    <option value="transfer">Transfer</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Mevcut Ürün Modu - Destinasyon -->
+                        <div class="col-md-6" id="destination_field" style="display: none;">
+                            <div class="mb-3">
+                                <label for="destination" class="form-label">Destinasyon *</label>
+                                <select class="form-select" id="destination" name="destination">
+                                    <option value="">Destinasyon Seçin</option>
+                                    @php
+                                        $destinations = \App\DDD\Modules\Contract\Models\Hotel::select('city', 'country')
+                                            ->distinct()
+                                            ->orderBy('city')
+                                            ->get();
+                                    @endphp
+                                    @foreach($destinations as $dest)
+                                        <option value="{{ $dest->city }}, {{ $dest->country }}">{{ $dest->city }}, {{ $dest->country }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="row">
+                    <!-- Mevcut Ürün Modu - Otel Seçimi -->
+                    <div class="row" id="hotel_selection" style="display: none;">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="hotel_id" class="form-label">Otel *</label>
+                                <select class="form-select" id="hotel_id" name="hotel_id">
+                                    <option value="">Önce destinasyon seçin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contract_id" class="form-label">Kontrat</label>
+                                <select class="form-select" id="contract_id" name="contract_id">
+                                    <option value="">Önce otel seçin</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tarih ve Kişi Sayısı (Mevcut Ürün Modu) -->
+                    <div class="row" id="date_person_fields" style="display: none;">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="check_in" class="form-label">Giriş Tarihi *</label>
+                                <input type="date" class="form-control" id="check_in" name="check_in">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="check_out" class="form-label">Çıkış Tarihi *</label>
+                                <input type="date" class="form-control" id="check_out" name="check_out">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="person_count" class="form-label">Kişi Sayısı *</label>
+                                <input type="number" min="1" class="form-control" id="person_count" name="person_count">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ön Görülen Fiyat Modu - Temel Fiyat -->
+                    <div class="row" id="base_price_field">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="base_price" class="form-label">Temel Fiyat *</label>
@@ -141,6 +223,7 @@
                         </div>
                     </div>
                     
+                    <!-- Ortak Alanlar -->
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
@@ -172,11 +255,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="destination" class="form-label">Destinasyon</label>
-                        <input type="text" class="form-control" id="destination" name="destination" placeholder="Örn: İstanbul">
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
@@ -186,4 +264,118 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modeEstimated = document.getElementById('mode_estimated');
+    const modeExisting = document.getElementById('mode_existing');
+    const productTypeField = document.getElementById('product_type_field');
+    const destinationField = document.getElementById('destination_field');
+    const hotelSelection = document.getElementById('hotel_selection');
+    const datePersonFields = document.getElementById('date_person_fields');
+    const basePriceField = document.getElementById('base_price_field');
+    const destinationSelect = document.getElementById('destination');
+    const hotelSelect = document.getElementById('hotel_id');
+    const contractSelect = document.getElementById('contract_id');
+    const productTypeSelect = document.getElementById('product_type');
+    const basePriceInput = document.getElementById('base_price');
+
+    // Mod değiştirme fonksiyonu
+    function toggleMode() {
+        if (modeEstimated.checked) {
+            // Ön görülen fiyat modu
+            productTypeField.style.display = 'block';
+            destinationField.style.display = 'none';
+            hotelSelection.style.display = 'none';
+            datePersonFields.style.display = 'none';
+            basePriceField.style.display = 'block';
+            
+            // Required attribute'ları ayarla
+            productTypeSelect.required = true;
+            basePriceInput.required = true;
+            destinationSelect.required = false;
+            hotelSelect.required = false;
+            document.getElementById('check_in').required = false;
+            document.getElementById('check_out').required = false;
+            document.getElementById('person_count').required = false;
+        } else {
+            // Mevcut ürün modu
+            productTypeField.style.display = 'none';
+            destinationField.style.display = 'block';
+            hotelSelection.style.display = 'block';
+            datePersonFields.style.display = 'block';
+            basePriceField.style.display = 'none';
+            
+            // Required attribute'ları ayarla
+            productTypeSelect.required = false;
+            basePriceInput.required = false;
+            destinationSelect.required = true;
+            hotelSelect.required = true;
+            document.getElementById('check_in').required = true;
+            document.getElementById('check_out').required = true;
+            document.getElementById('person_count').required = true;
+        }
+    }
+
+    // Event listeners
+    modeEstimated.addEventListener('change', toggleMode);
+    modeExisting.addEventListener('change', toggleMode);
+
+    // Destinasyon değiştiğinde otelleri yükle
+    destinationSelect.addEventListener('change', function() {
+        const destination = this.value;
+        hotelSelect.innerHTML = '<option value="">Yükleniyor...</option>';
+        
+        if (destination) {
+            fetch(`/api/hotels/by-destination?destination=${encodeURIComponent(destination)}`)
+                .then(response => response.json())
+                .then(data => {
+                    hotelSelect.innerHTML = '<option value="">Otel Seçin</option>';
+                    data.forEach(hotel => {
+                        const option = document.createElement('option');
+                        option.value = hotel.id;
+                        option.textContent = hotel.name;
+                        hotelSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    hotelSelect.innerHTML = '<option value="">Hata oluştu</option>';
+                });
+        } else {
+            hotelSelect.innerHTML = '<option value="">Önce destinasyon seçin</option>';
+            contractSelect.innerHTML = '<option value="">Önce otel seçin</option>';
+        }
+    });
+
+    // Otel değiştiğinde kontratları yükle
+    hotelSelect.addEventListener('change', function() {
+        const hotelId = this.value;
+        contractSelect.innerHTML = '<option value="">Yükleniyor...</option>';
+        
+        if (hotelId) {
+                fetch(`/api/contracts/by-hotel/${hotelId}`)
+                .then(response => response.json())
+                .then(data => {
+                    contractSelect.innerHTML = '<option value="">Kontrat Seçin (Opsiyonel)</option>';
+                    data.forEach(contract => {
+                        const option = document.createElement('option');
+                        option.value = contract.id;
+                        option.textContent = `${contract.name} (${contract.currency} ${contract.base_price})`;
+                        contractSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    contractSelect.innerHTML = '<option value="">Hata oluştu</option>';
+                });
+        } else {
+            contractSelect.innerHTML = '<option value="">Önce otel seçin</option>';
+        }
+    });
+
+    // İlk yükleme
+    toggleMode();
+});
+</script>
 @endsection 

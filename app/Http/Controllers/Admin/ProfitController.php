@@ -211,16 +211,49 @@ class ProfitController extends Controller
 
     public function calculate(Request $request)
     {
-        $request->validate([
+        $validationRules = [
             'firm_id' => 'required|exists:firms,id',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'contract_id' => 'nullable|exists:contracts,id',
-            'base_price' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
             'service_type' => 'required|in:reservation,cancellation,modification,booking',
             'trip_type' => 'required|in:domestic,international',
             'travel_type' => 'required|in:one_way,round_trip',
-            'destination' => 'nullable|string'
+            'calculation_mode' => 'required|in:estimated,existing'
+        ];
+
+        // Mod'a göre validation kuralları
+        if ($request->calculation_mode === 'estimated') {
+            // Ön görülen fiyat modu
+            $validationRules['product_type'] = 'required|in:hotel,flight,car,activity,transfer';
+            $validationRules['base_price'] = 'required|numeric|min:0';
+        } else {
+            // Mevcut ürün modu
+            $validationRules['destination'] = 'required|string';
+            $validationRules['hotel_id'] = 'required|exists:hotels,id';
+            $validationRules['contract_id'] = 'nullable|exists:contracts,id';
+            $validationRules['check_in'] = 'required|date';
+            $validationRules['check_out'] = 'required|date|after:check_in';
+            $validationRules['person_count'] = 'required|integer|min:1';
+        }
+
+        $request->validate($validationRules, [
+            'firm_id.required' => 'Firma seçimi zorunludur.',
+            'firm_id.exists' => 'Seçilen firma bulunamadı.',
+            'product_type.required' => 'Ürün tipi seçimi zorunludur.',
+            'product_type.in' => 'Geçersiz ürün tipi.',
+            'base_price.required' => 'Temel fiyat zorunludur.',
+            'base_price.numeric' => 'Temel fiyat sayı olmalıdır.',
+            'base_price.min' => 'Temel fiyat 0\'dan küçük olamaz.',
+            'destination.required' => 'Destinasyon seçimi zorunludur.',
+            'hotel_id.required' => 'Otel seçimi zorunludur.',
+            'hotel_id.exists' => 'Seçilen otel bulunamadı.',
+            'check_in.required' => 'Giriş tarihi zorunludur.',
+            'check_in.date' => 'Geçerli bir giriş tarihi giriniz.',
+            'check_out.required' => 'Çıkış tarihi zorunludur.',
+            'check_out.date' => 'Geçerli bir çıkış tarihi giriniz.',
+            'check_out.after' => 'Çıkış tarihi giriş tarihinden sonra olmalıdır.',
+            'person_count.required' => 'Kişi sayısı zorunludur.',
+            'person_count.integer' => 'Kişi sayısı tam sayı olmalıdır.',
+            'person_count.min' => 'Kişi sayısı en az 1 olmalıdır.'
         ]);
 
         $calculation = $this->profitService->calculateProfit($request->all());

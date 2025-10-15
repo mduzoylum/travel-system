@@ -180,4 +180,27 @@ class ContractController extends Controller
         return redirect()->route('admin.contracts.rooms', $contract)
             ->with('success', 'Oda başarıyla silindi.');
     }
+
+    public function getContractsByHotel($hotelId)
+    {
+        $contracts = Contract::where('hotel_id', $hotelId)
+            ->where('is_active', true)
+            ->select('id', 'hotel_id', 'firm_id', 'base_price', 'currency', 'start_date', 'end_date')
+            ->with('firm:id,name')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function($contract) {
+                return [
+                    'id' => $contract->id,
+                    'name' => ($contract->firm ? $contract->firm->name . ' - ' : '') . 
+                              'Kontrat #' . $contract->id,
+                    'base_price' => $contract->base_price,
+                    'currency' => $contract->currency,
+                    'start_date' => $contract->start_date,
+                    'end_date' => $contract->end_date
+                ];
+            });
+
+        return response()->json($contracts);
+    }
 } 

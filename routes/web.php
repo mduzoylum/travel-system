@@ -16,6 +16,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/approval/{token}/accept', [PublicApprovalController::class, 'accept']);
 Route::get('/approval/{token}/reject', [PublicApprovalController::class, 'reject']);
 
+// Public API endpoints (no middleware)
+Route::get('/api/hotels/by-destination', [HotelController::class, 'getHotelsByDestination'])->name('api.hotels.by-destination')->withoutMiddleware(['auth', 'admin']);
+Route::get('/api/contracts/by-hotel/{hotelId}', [ContractController::class, 'getContractsByHotel'])->name('api.contracts.by-hotel')->withoutMiddleware(['auth', 'admin']);
+
 Route::get('/', function () {
     return redirect()->route('admin.dashboard');
 })->name('home');
@@ -38,12 +42,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('hotels/import', [HotelController::class, 'import'])->name('hotels.import');
     Route::get('hotels/export', [HotelController::class, 'export'])->name('hotels.export');
     Route::get('hotels/template/download', [HotelController::class, 'downloadTemplate'])->name('hotels.template.download');
+    Route::get('hotels/by-destination', [HotelController::class, 'getHotelsByDestination'])->name('hotels.by-destination');
     
     // Contracts
     Route::resource('contracts', ContractController::class);
     Route::get('contracts/{contract}/rooms', [ContractController::class, 'rooms'])->name('contracts.rooms');
     Route::post('contracts/{contract}/rooms', [ContractController::class, 'addRoom'])->name('contracts.rooms.store');
     Route::delete('contracts/{contract}/rooms/{room}', [ContractController::class, 'destroyRoom'])->name('contracts.rooms.destroy');
+    Route::get('contracts/by-hotel/{hotelId}', [ContractController::class, 'getContractsByHotel'])->name('contracts.by-hotel');
     
     // Credits
     Route::resource('credits', CreditController::class)->parameters(['credits' => 'creditAccount']);

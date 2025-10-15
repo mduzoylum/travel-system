@@ -20,7 +20,35 @@ class ProfitCalculationService
         $calculation->supplier_id = $data['supplier_id'] ?? null;
         $calculation->contract_id = $data['contract_id'] ?? null;
         $calculation->reservation_id = $data['reservation_id'] ?? null;
-        $calculation->base_price = $data['base_price'];
+        
+        // Mod'a göre base_price belirleme
+        \Log::info('Calculation data:', $data);
+        
+        if ($data['calculation_mode'] === 'estimated') {
+            $calculation->base_price = $data['base_price'] ?? 0;
+            \Log::info('Estimated mode - base_price: ' . $calculation->base_price);
+        } else {
+            // Mevcut ürün modu - kontrat fiyatını kullan
+            if (!empty($data['contract_id'])) {
+                $contract = \App\DDD\Modules\Contract\Models\Contract::find($data['contract_id']);
+                if ($contract && $contract->base_price) {
+                    $calculation->base_price = $contract->base_price;
+                } else {
+                    // Kontrat'ta base_price yoksa otelin min_price'ını kullan
+                    $hotel = \App\DDD\Modules\Contract\Models\Hotel::find($data['hotel_id']);
+                    $calculation->base_price = $hotel ? $hotel->min_price : 0;
+                }
+                \Log::info('Contract mode - base_price: ' . $calculation->base_price);
+            } else {
+                // Kontrat yoksa otelin min_price'ını kullan
+                $hotel = \App\DDD\Modules\Contract\Models\Hotel::find($data['hotel_id']);
+                $calculation->base_price = $hotel ? $hotel->min_price : 0;
+                \Log::info('Hotel mode - base_price: ' . $calculation->base_price);
+            }
+        }
+        
+        \Log::info('Final base_price: ' . $calculation->base_price);
+        
         $calculation->currency = $data['currency'] ?? 'TRY';
         $calculation->status = 'draft';
 
@@ -62,8 +90,12 @@ class ProfitCalculationService
             ->get();
 
         $totalFee = 0;
+        $basePrice = $data['calculation_mode'] === 'estimated' ? 
+            $data['base_price'] : 
+            ($data['base_price'] ?? 0);
+            
         foreach ($serviceFees as $serviceFee) {
-            $totalFee += $serviceFee->calculateFee($data['base_price']);
+            $totalFee += $serviceFee->calculateFee($basePrice);
         }
 
         return $totalFee;
@@ -79,9 +111,13 @@ class ProfitCalculationService
             ->get();
 
         $commission = 0;
+        $basePrice = $data['calculation_mode'] === 'estimated' ? 
+            $data['base_price'] : 
+            ($data['base_price'] ?? 0);
+            
         foreach ($profitRules as $rule) {
             if ($rule->isApplicable($data)) {
-                $commission = $rule->calculateFee($data['base_price']);
+                $commission = $rule->calculateFee($basePrice);
                 break; // İlk uygun kuralı kullan
             }
         }
@@ -94,8 +130,12 @@ class ProfitCalculationService
      */
     private function calculateProfitMargin(array $data): float
     {
+        $basePrice = $data['calculation_mode'] === 'estimated' ? 
+            $data['base_price'] : 
+            ($data['base_price'] ?? 0);
+            
         // Basit kar marjı hesaplama (varsayılan %10)
-        $defaultMargin = $data['base_price'] * 0.10;
+        $defaultMargin = $basePrice * 0.10;
 
         // Firma bazlı özel kar marjı kontrolü
         $firm = Firm::find($data['firm_id']);

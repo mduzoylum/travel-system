@@ -47,7 +47,7 @@ class ProfitRule extends Model
         }
 
         // Tedarikçi kontrolü
-        if ($this->supplier_id && $data['supplier_id'] != $this->supplier_id) {
+        if ($this->supplier_id && isset($data['supplier_id']) && $data['supplier_id'] != $this->supplier_id) {
             return false;
         }
 

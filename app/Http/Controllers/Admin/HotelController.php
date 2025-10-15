@@ -167,4 +167,27 @@ class HotelController extends Controller
         return redirect()->route('admin.hotels.index')
             ->with('info', 'Template download özelliği yakında eklenecek.');
     }
+
+    public function getHotelsByDestination(Request $request)
+    {
+        $destination = $request->get('destination');
+        
+        if (!$destination) {
+            return response()->json([]);
+        }
+
+        // Destinasyonu parse et (city, country formatında)
+        $parts = explode(', ', $destination);
+        $city = $parts[0] ?? '';
+        $country = $parts[1] ?? '';
+
+        $hotels = Hotel::where('city', $city)
+            ->where('country', $country)
+            ->where('is_active', true)
+            ->select('id', 'name', 'city', 'country')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($hotels);
+    }
 } 
