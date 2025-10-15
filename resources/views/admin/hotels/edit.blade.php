@@ -15,6 +15,17 @@
 
             <div class="card">
                 <div class="card-body">
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Lütfen aşağıdaki hataları düzeltin:</h6>
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('admin.hotels.update', $hotel) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
@@ -32,17 +43,17 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="star_rating" class="form-label">Yıldız Sayısı *</label>
-                                        <select class="form-select @error('star_rating') is-invalid @enderror" 
-                                                id="star_rating" name="star_rating" required>
+                                        <label for="stars" class="form-label">Yıldız Sayısı *</label>
+                                        <select class="form-select @error('stars') is-invalid @enderror" 
+                                                id="stars" name="stars" required>
                                             <option value="">Seçiniz</option>
                                             @for($i = 1; $i <= 5; $i++)
-                                                <option value="{{ $i }}" {{ old('star_rating', $hotel->star_rating) == $i ? 'selected' : '' }}>
+                                                <option value="{{ $i }}" {{ old('stars', $hotel->stars) == $i ? 'selected' : '' }}>
                                                     {{ $i }} Yıldız
                                                 </option>
                                             @endfor
                                         </select>
-                                        @error('star_rating')
+                                        @error('stars')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -73,6 +84,15 @@
                                     <textarea class="form-control @error('address') is-invalid @enderror" 
                                               id="address" name="address" rows="3" required>{{ old('address', $hotel->address) }}</textarea>
                                     @error('address')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="min_price" class="form-label">Minimum Fiyat (₺) *</label>
+                                    <input type="number" step="0.01" min="0" class="form-control @error('min_price') is-invalid @enderror" 
+                                           id="min_price" name="min_price" value="{{ old('min_price', $hotel->min_price) }}" required>
+                                    @error('min_price')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -117,8 +137,13 @@
                                     <label for="image" class="form-label">Otel Resmi</label>
                                     @if($hotel->image)
                                         <div class="mb-2">
-                                            <img src="{{ Storage::url($hotel->image) }}" alt="{{ $hotel->name }}" 
-                                                 class="img-thumbnail" style="max-width: 200px;">
+                                            @if(str_starts_with($hotel->image, 'http'))
+                                                <img src="{{ $hotel->image }}" alt="{{ $hotel->name }}" 
+                                                     class="img-thumbnail" style="max-width: 200px;">
+                                            @else
+                                                <img src="{{ asset('storage/' . $hotel->image) }}" alt="{{ $hotel->name }}" 
+                                                     class="img-thumbnail" style="max-width: 200px;">
+                                            @endif
                                         </div>
                                     @endif
                                     <input type="file" class="form-control @error('image') is-invalid @enderror" 
@@ -127,7 +152,7 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <div class="form-text">
-                                        Desteklenen formatlar: JPEG, PNG, JPG, GIF (Max: 2MB)
+                                        Desteklenen formatlar: JPEG, PNG, JPG, GIF (Max: 5MB)
                                     </div>
                                 </div>
 

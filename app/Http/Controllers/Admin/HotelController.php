@@ -34,13 +34,30 @@ class HotelController extends Controller
             'name' => 'required|string|max:255',
             'city' => 'required|string|max:100',
             'country' => 'required|string|max:100',
+            'address' => 'required|string|max:500',
             'stars' => 'required|integer|min:1|max:5',
             'min_price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'supplier_id' => 'nullable|exists:suppliers,id',
             'external_id' => 'nullable|string|max:255',
             'is_active' => 'boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+        ], [
+            'name.required' => 'Otel adı zorunludur.',
+            'city.required' => 'Şehir zorunludur.',
+            'country.required' => 'Ülke zorunludur.',
+            'address.required' => 'Adres zorunludur.',
+            'stars.required' => 'Yıldız sayısı seçilmelidir.',
+            'stars.integer' => 'Yıldız sayısı geçerli bir sayı olmalıdır.',
+            'stars.min' => 'Yıldız sayısı en az 1 olmalıdır.',
+            'stars.max' => 'Yıldız sayısı en fazla 5 olabilir.',
+            'min_price.required' => 'Minimum fiyat zorunludur.',
+            'min_price.numeric' => 'Minimum fiyat geçerli bir sayı olmalıdır.',
+            'min_price.min' => 'Minimum fiyat 0\'dan küçük olamaz.',
+            'image.image' => 'Yüklenen dosya bir resim olmalıdır.',
+            'image.mimes' => 'Resim formatı jpeg, png, jpg veya gif olmalıdır.',
+            'image.max' => 'Resim boyutu en fazla 5MB olabilir.',
+            'supplier_id.exists' => 'Seçilen tedarikçi bulunamadı.',
         ]);
 
         $data = $request->except('image');
@@ -69,13 +86,30 @@ class HotelController extends Controller
             'name' => 'required|string|max:255',
             'city' => 'required|string|max:100',
             'country' => 'required|string|max:100',
+            'address' => 'required|string|max:500',
             'stars' => 'required|integer|min:1|max:5',
             'min_price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'supplier_id' => 'nullable|exists:suppliers,id',
             'external_id' => 'nullable|string|max:255',
             'is_active' => 'boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+        ], [
+            'name.required' => 'Otel adı zorunludur.',
+            'city.required' => 'Şehir zorunludur.',
+            'country.required' => 'Ülke zorunludur.',
+            'address.required' => 'Adres zorunludur.',
+            'stars.required' => 'Yıldız sayısı seçilmelidir.',
+            'stars.integer' => 'Yıldız sayısı geçerli bir sayı olmalıdır.',
+            'stars.min' => 'Yıldız sayısı en az 1 olmalıdır.',
+            'stars.max' => 'Yıldız sayısı en fazla 5 olabilir.',
+            'min_price.required' => 'Minimum fiyat zorunludur.',
+            'min_price.numeric' => 'Minimum fiyat geçerli bir sayı olmalıdır.',
+            'min_price.min' => 'Minimum fiyat 0\'dan küçük olamaz.',
+            'image.image' => 'Yüklenen dosya bir resim olmalıdır.',
+            'image.mimes' => 'Resim formatı jpeg, png, jpg veya gif olmalıdır.',
+            'image.max' => 'Resim boyutu en fazla 5MB olabilir.',
+            'supplier_id.exists' => 'Seçilen tedarikçi bulunamadı.',
         ]);
 
         $data = $request->except('image');

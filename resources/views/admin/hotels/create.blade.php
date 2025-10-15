@@ -15,6 +15,17 @@
 
             <div class="card">
                 <div class="card-body">
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Lütfen aşağıdaki hataları düzeltin:</h6>
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('admin.hotels.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         
@@ -129,7 +140,7 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <div class="form-text">
-                                        Desteklenen formatlar: JPEG, PNG, JPG, GIF (Max: 2MB)
+                                        Desteklenen formatlar: JPEG, PNG, JPG, GIF (Max: 5MB)
                                     </div>
                                 </div>
 

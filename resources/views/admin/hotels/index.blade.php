@@ -44,13 +44,17 @@
                         <tr>
                             <td>{{ $hotel->id }}</td>
                             <td>
-                                <!-- @if($hotel->image)
-                                    <img src="{{ asset('storage/' . $hotel->image) }}" alt="{{ $hotel->name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
-                                @else -->
+                                @if($hotel->image)
+                                    @if(str_starts_with($hotel->image, 'http'))
+                                        <img src="{{ $hotel->image }}" alt="{{ $hotel->name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                    @else
+                                        <img src="{{ asset('storage/' . $hotel->image) }}" alt="{{ $hotel->name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                    @endif
+                                @else
                                     <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                                         <i class="fas fa-hotel"></i>
                                     </div>
-                                <!-- @endif -->
+                                @endif
                             </td>
                             <td>{{ $hotel->name }}</td>
                             <td>{{ $hotel->city }}</td>

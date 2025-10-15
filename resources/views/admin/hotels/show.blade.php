@@ -154,7 +154,11 @@
             </div>
             <div class="card-body text-center">
                 @if($hotel->image)
-                    <img src="{{ asset('storage/' . $hotel->image) }}" alt="{{ $hotel->name }}" class="img-fluid rounded">
+                    @if(str_starts_with($hotel->image, 'http'))
+                        <img src="{{ $hotel->image }}" alt="{{ $hotel->name }}" class="img-fluid rounded">
+                    @else
+                        <img src="{{ asset('storage/' . $hotel->image) }}" alt="{{ $hotel->name }}" class="img-fluid rounded">
+                    @endif
                 @else
                     <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
                         <i class="fas fa-hotel fa-3x"></i>
