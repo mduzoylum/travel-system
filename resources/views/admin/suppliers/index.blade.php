@@ -17,10 +17,14 @@
                         <tr>
                             <th>ID</th>
                             <th>Ad</th>
+                            @if(auth()->user()->isAdmin())
+                                <th>Grup</th>
+                            @endif
+                            <th>Ülke/Şehir</th>
                             <th>Tür</th>
-                            <th>API URL</th>
+                            <th>Muhasebe Kodu</th>
+                            <th>Ödeme Tipi</th>
                             <th>Durum</th>
-                            <th>Son Sync</th>
                             <th>Otel Sayısı</th>
                             <th>İşlemler</th>
                         </tr>
@@ -30,9 +34,44 @@
                         <tr>
                             <td>{{ $supplier->id }}</td>
                             <td>
-                                <strong>{{ $supplier->name }}</strong>
-                                @if($supplier->description)
-                                    <br><small class="text-muted">{{ Str::limit($supplier->description, 50) }}</small>
+                                <div class="d-flex align-items-center">
+                                    @if($supplier->logo)
+                                        <img src="{{ Storage::url($supplier->logo) }}" alt="Logo" class="me-2" style="max-height: 30px;">
+                                    @endif
+                                    <div>
+                                        <strong>{{ $supplier->name }}</strong>
+                                        @if($supplier->description)
+                                            <br><small class="text-muted">{{ Str::limit($supplier->description, 50) }}</small>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            @if(auth()->user()->isAdmin())
+                                <td>
+                                    @if($supplier->group)
+                                        <span class="badge" style="background-color: {{ $supplier->group->color }}; color: white;">
+                                            {{ $supplier->group->name }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">Grup yok</span>
+                                    @endif
+                                </td>
+                            @endif
+                            <td>
+                                @if($supplier->country || $supplier->city)
+                                    <small>
+                                        @if($supplier->country)
+                                            <i class="fas fa-flag"></i> {{ $supplier->country }}
+                                        @endif
+                                        @if($supplier->country && $supplier->city)
+                                            <br>
+                                        @endif
+                                        @if($supplier->city)
+                                            <i class="fas fa-map-marker-alt"></i> {{ $supplier->city }}
+                                        @endif
+                                    </small>
+                                @else
+                                    <span class="text-muted">Belirtilmemiş</span>
                                 @endif
                             </td>
                             <td>
@@ -45,50 +84,59 @@
                                 @endif
                             </td>
                             <td>
-                                @if($supplier->api_url)
-                                    <code>{{ Str::limit($supplier->api_url, 30) }}</code>
+                                @if($supplier->accounting_code)
+                                    <code>{{ $supplier->accounting_code }}</code>
                                 @else
-                                    <span class="text-muted">-</span>
+                                    <span class="text-muted">Belirtilmemiş</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($supplier->payment_type == 'cari')
+                                    <span class="badge bg-primary">Cari</span>
+                                @elseif($supplier->payment_type == 'credit_card')
+                                    <span class="badge bg-success">Kredi Kartı</span>
+                                @else
+                                    <span class="text-muted">Belirtilmemiş</span>
                                 @endif
                             </td>
                             <td>
                                 @if($supplier->is_active)
                                     <span class="badge bg-success">Aktif</span>
                                 @else
-                                    <span class="badge bg-secondary">Pasif</span>
+                                    <span class="badge bg-danger">
+                                        Pasif
+                                        <i class="fas fa-exclamation-triangle ms-1" title="Satış kanalında gösterilmez"></i>
+                                    </span>
                                 @endif
                             </td>
                             <td>
-                                @if($supplier->last_sync_at)
-                                    <small>{{ $supplier->last_sync_at->format('d.m.Y H:i') }}</small>
-                                @else
-                                    <span class="text-muted">Hiç sync edilmemiş</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge bg-primary">{{ $supplier->hotels->count() }} Otel</span>
+                                <span class="badge bg-info">{{ $supplier->hotels->count() }}</span>
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('admin.suppliers.show', $supplier) }}" class="btn btn-sm btn-info">
+                                    <a href="{{ route('admin.suppliers.show', $supplier) }}" 
+                                       class="btn btn-info btn-sm" title="Görüntüle">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('admin.suppliers.edit', $supplier) }}" class="btn btn-sm btn-warning">
+                                    <a href="{{ route('admin.suppliers.edit', $supplier) }}" 
+                                       class="btn btn-warning btn-sm" title="Düzenle">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-success" onclick="testConnection({{ $supplier->id }})">
-                                        <i class="fas fa-plug"></i>
+                                    <button type="button" class="btn btn-{{ $supplier->is_active ? 'secondary' : 'success' }} btn-sm" 
+                                            onclick="toggleSupplierStatus({{ $supplier->id }})" 
+                                            title="{{ $supplier->is_active ? 'Pasif Yap' : 'Aktif Yap' }}">
+                                        <i class="fas fa-{{ $supplier->is_active ? 'pause' : 'play' }}"></i>
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-primary" onclick="syncSupplier({{ $supplier->id }})">
-                                        <i class="fas fa-sync"></i>
-                                    </button>
-                                    <form action="{{ route('admin.suppliers.destroy', $supplier) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu tedarikçiyi silmek istediğinizden emin misiniz?')">
+                                    @if(auth()->user()->isAdmin())
+                                    <form action="{{ route('admin.suppliers.destroy', $supplier) }}" method="POST" 
+                                          class="d-inline" onsubmit="return confirm('Bu tedarikçiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
+                                        <button type="submit" class="btn btn-danger btn-sm" title="Sil">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -97,6 +145,7 @@
                 </table>
             </div>
             
+            <!-- Pagination -->
             <div class="d-flex justify-content-center mt-4">
                 {{ $suppliers->links() }}
             </div>
@@ -104,105 +153,40 @@
             <div class="text-center py-5">
                 <i class="fas fa-truck fa-3x text-muted mb-3"></i>
                 <h5 class="text-muted">Henüz tedarikçi eklenmemiş</h5>
-                <p class="text-muted">İlk tedarikçiyi eklemek için yukarıdaki butonu kullanın.</p>
+                <p class="text-muted">İlk tedarikçinizi eklemek için aşağıdaki butona tıklayın.</p>
+                <a href="{{ route('admin.suppliers.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Yeni Tedarikçi Ekle
+                </a>
             </div>
         @endif
-    </div>
-</div>
-
-<!-- Sync Modal -->
-<div class="modal fade" id="syncModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Tedarikçi Senkronizasyonu</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="syncProgress" class="d-none">
-                    <div class="text-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Senkronize ediliyor...</span>
-                        </div>
-                        <p class="mt-2">Tedarikçi verileri senkronize ediliyor...</p>
-                    </div>
-                </div>
-                <div id="syncResult"></div>
-            </div>
-        </div>
     </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-function testConnection(supplierId) {
-    fetch(`/admin/suppliers/${supplierId}/test-connection`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Bağlantı başarılı!');
-        } else {
-            alert('Bağlantı hatası: ' + data.message);
-        }
-    })
-    .catch(error => {
-        alert('Bağlantı testi sırasında hata oluştu.');
-    });
-}
-
-function syncSupplier(supplierId) {
-    const modal = new bootstrap.Modal(document.getElementById('syncModal'));
-    const progress = document.getElementById('syncProgress');
-    const result = document.getElementById('syncResult');
-    
-    modal.show();
-    progress.classList.remove('d-none');
-    result.innerHTML = '';
-    
-    fetch(`/admin/suppliers/${supplierId}/sync`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        progress.classList.add('d-none');
-        if (data.success) {
-            result.innerHTML = `
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> Senkronizasyon başarılı!
-                    <br>${data.message}
-                </div>
-            `;
-            setTimeout(() => {
+function toggleSupplierStatus(supplierId) {
+    if (confirm('Tedarikçi durumunu değiştirmek istediğinizden emin misiniz?')) {
+        fetch(`/admin/suppliers/${supplierId}/toggle-status`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                 location.reload();
-            }, 2000);
-        } else {
-            result.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i> Senkronizasyon hatası!
-                    <br>${data.message}
-                </div>
-            `;
-        }
-    })
-    .catch(error => {
-        progress.classList.add('d-none');
-        result.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i> Senkronizasyon sırasında hata oluştu.
-            </div>
-        `;
-    });
+            } else {
+                alert('Hata: ' + (data.message || 'Bilinmeyen hata'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
 }
 </script>
-@endpush 
+@endpush

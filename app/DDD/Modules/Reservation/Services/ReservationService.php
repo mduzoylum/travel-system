@@ -156,6 +156,9 @@ class ReservationService
                 $query->where('start_date', '<=', $date)
                       ->where('end_date', '>=', $date);
             })
+            ->whereHas('hotel.supplier', function($q) {
+                $q->where('is_active', true);
+            })
             ->with('hotel')
             ->get();
 

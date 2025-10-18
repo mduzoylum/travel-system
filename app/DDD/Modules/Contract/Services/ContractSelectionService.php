@@ -92,6 +92,9 @@ class ContractSelectionService
             ->where('is_active', true)
             ->where('start_date', '<=', $checkDate)
             ->where('end_date', '>=', $checkDate)
+            ->whereHas('hotel.supplier', function($q) {
+                $q->where('is_active', true);
+            })
             ->get();
 
         foreach ($firmContracts as $contract) {
@@ -132,7 +135,10 @@ class ContractSelectionService
         $query = Contract::where('hotel_id', $hotelId)
             ->where('is_active', true)
             ->where('start_date', '<=', $date)
-            ->where('end_date', '>=', $date);
+            ->where('end_date', '>=', $date)
+            ->whereHas('hotel.supplier', function($q) {
+                $q->where('is_active', true);
+            });
 
         if ($firmId === null) {
             $query->whereNull('firm_id');

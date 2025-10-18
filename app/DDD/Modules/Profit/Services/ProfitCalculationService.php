@@ -215,19 +215,27 @@ class ProfitCalculationService
     /**
      * Firma için kar raporu oluştur
      */
-    public function generateProfitReport(int $firmId, string $startDate, string $endDate): array
+    public function generateProfitReport(int $firmId, string $startDate, string $endDate, ?int $supplierGroupId = null): array
     {
-        $calculations = ProfitCalculation::where('firm_id', $firmId)
+        $query = ProfitCalculation::where('firm_id', $firmId)
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'confirmed')
-            ->get();
+            ->where('status', 'confirmed');
+            
+        // Tedarikçi grubu filtresi
+        if ($supplierGroupId) {
+            $query->whereHas('supplier', function($q) use ($supplierGroupId) {
+                $q->where('group_id', $supplierGroupId);
+            });
+        }
+        
+        $calculations = $query->get();
 
         $totalRevenue = $calculations->sum('sale_price');
         $totalCost = $calculations->sum('total_cost');
         $totalProfit = $calculations->sum('profit_amount');
         $averageProfitPercentage = $calculations->avg('profit_percentage');
 
-        return [
+        $report = [
             'period' => [
                 'start' => $startDate,
                 'end' => $endDate
@@ -245,6 +253,20 @@ class ProfitCalculationService
                 'profit_distribution' => $this->getProfitDistribution($calculations)
             ]
         ];
+
+        // Tedarikçi grubu bilgisini ekle
+        if ($supplierGroupId) {
+            $supplierGroup = \App\Models\SupplierGroup::find($supplierGroupId);
+            if ($supplierGroup) {
+                $report['supplier_group'] = [
+                    'id' => $supplierGroup->id,
+                    'name' => $supplierGroup->name,
+                    'color' => $supplierGroup->color
+                ];
+            }
+        }
+
+        return $report;
     }
 
     /**

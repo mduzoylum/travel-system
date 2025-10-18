@@ -7,6 +7,7 @@ use App\DDD\Modules\Supplier\Domain\Entities\Supplier;
 use App\DDD\Modules\Supplier\Domain\ValueObjects\SupplierType;
 use App\DDD\Modules\Supplier\Infrastructure\Services\MockApiService;
 use App\DDD\Modules\Contract\Models\Hotel;
+use App\Models\SupplierGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -14,14 +15,16 @@ class SupplierController extends Controller
 {
     public function index()
     {
-        // Admin olmayan kullanıcılar için API entegrasyonu olmayan tedarikçileri göster
+        // Admin olmayan kullanıcılar sadece API entegrasyonu olmayan tedarikçileri görebilir
         if (!auth()->user()->isAdmin()) {
-            $suppliers = Supplier::whereNull('api_endpoint')
-                ->whereNull('api_credentials')
+            $suppliers = Supplier::with('group')
+                ->whereNull('api_endpoint')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
         } else {
-            $suppliers = Supplier::orderBy('created_at', 'desc')->paginate(15);
+            $suppliers = Supplier::with('group')
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
         }
         
         return view('admin.suppliers.index', compact('suppliers'));
@@ -29,13 +32,18 @@ class SupplierController extends Controller
 
     public function create()
     {
-        return view('admin.suppliers.create');
+        $groups = SupplierGroup::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        return view('admin.suppliers.create', compact('groups'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'group_id' => 'nullable|exists:supplier_groups,id',
             'name' => 'required|string|max:255',
+            'country' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
+            'accounting_code' => 'nullable|string|max:50',
             'types' => 'required|array|min:1',
             'types.*' => 'required|string|in:hotel,flight,car,activity,transfer',
             'description' => 'nullable|string',
@@ -45,21 +53,84 @@ class SupplierController extends Controller
             'api_password' => 'nullable|string|max:100',
             'api_key' => 'nullable|string|max:255',
             'sync_frequency' => 'nullable|string',
+            'payment_type' => 'nullable|in:cari,credit_card',
+            'address' => 'nullable|string',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'tax_rate' => 'nullable|numeric|min:0|max:100',
             'is_active' => 'nullable|in:on,1,true',
             'sync_enabled' => 'nullable|in:on,1,true'
         ]);
 
         // Sadece izin verilen alanları al
         $data = [
+            'group_id' => $request->group_id,
             'name' => $request->name,
+            'country' => $request->country,
+            'city' => $request->city,
+            'accounting_code' => $request->accounting_code,
             'types' => $request->types,
             'description' => $request->description,
             'api_endpoint' => $request->api_endpoint,
             'api_version' => $request->api_version,
             'sync_frequency' => $request->sync_frequency,
+            'payment_type' => $request->payment_type ?? 'cari',
+            'address' => $request->address,
+            'tax_rate' => $request->tax_rate ?? 0,
             'is_active' => $request->has('is_active'),
             'sync_enabled' => $request->has('sync_enabled'),
         ];
+
+        // Logo yükleme
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('suppliers/logos', 'public');
+            $data['logo'] = $logoPath;
+        }
+
+        // Ödeme periyodlarını işle
+        $paymentPeriods = [];
+        if ($request->payment_period_type === 'days') {
+            $paymentPeriods = [
+                'type' => 'days',
+                'before_booking' => $request->payment_days_before ?? 0,
+                'after_booking' => $request->payment_days_after ?? 0
+            ];
+        } elseif ($request->payment_period_type === 'monthly') {
+            $paymentPeriods = [
+                'type' => 'monthly',
+                'days' => $request->payment_monthly_days ?? []
+            ];
+        }
+        $data['payment_periods'] = $paymentPeriods;
+
+        // İletişim kişilerini işle
+        $contactPersons = [];
+        if ($request->contact_names) {
+            foreach ($request->contact_names as $index => $name) {
+                if ($name && isset($request->contact_phones[$index])) {
+                    $contactPersons[] = [
+                        'name' => $name,
+                        'phone' => $request->contact_phones[$index],
+                        'email' => $request->contact_emails[$index] ?? null
+                    ];
+                }
+            }
+        }
+        $data['contact_persons'] = $contactPersons;
+
+        // E-postaları işle
+        $emails = [];
+        if ($request->supplier_emails) {
+            foreach ($request->supplier_emails as $index => $email) {
+                if ($email && isset($request->supplier_email_names[$index])) {
+                    $emails[] = [
+                        'name' => $request->supplier_email_names[$index],
+                        'email' => $email,
+                        'is_primary' => $request->supplier_email_primary[$index] ?? false
+                    ];
+                }
+            }
+        }
+        $data['emails'] = $emails;
 
         // API credentials'ı JSON olarak sakla
         $apiCredentials = [];
@@ -83,7 +154,12 @@ class SupplierController extends Controller
 
     public function show(Supplier $supplier)
     {
-        $supplier->load(['hotels']);
+        // Admin olmayan kullanıcılar XML/API entegrasyonu olan tedarikçileri görüntüleyemez
+        if (!auth()->user()->isAdmin() && ($supplier->api_endpoint || $supplier->api_credentials)) {
+            abort(403, 'Bu tedarikçiye erişim yetkiniz yok. Sadece admin kullanıcılar XML entegrasyonu olan tedarikçileri görüntüleyebilir.');
+        }
+        
+        $supplier->load(['hotels', 'group']);
         return view('admin.suppliers.show', compact('supplier'));
     }
 
@@ -96,7 +172,8 @@ class SupplierController extends Controller
             }
         }
         
-        return view('admin.suppliers.edit', compact('supplier'));
+        $groups = SupplierGroup::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        return view('admin.suppliers.edit', compact('supplier', 'groups'));
     }
 
     public function update(Request $request, Supplier $supplier)
@@ -109,7 +186,11 @@ class SupplierController extends Controller
         }
         
         $request->validate([
+            'group_id' => 'nullable|exists:supplier_groups,id',
             'name' => 'required|string|max:255',
+            'country' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
+            'accounting_code' => 'nullable|string|max:50',
             'types' => 'required|array|min:1',
             'types.*' => 'required|string|in:hotel,flight,car,activity,transfer',
             'description' => 'nullable|string',
@@ -119,6 +200,10 @@ class SupplierController extends Controller
             'api_password' => 'nullable|string|max:100',
             'api_key' => 'nullable|string|max:255',
             'sync_frequency' => 'nullable|string',
+            'payment_type' => 'nullable|in:cari,credit_card',
+            'address' => 'nullable|string',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'tax_rate' => 'nullable|numeric|min:0|max:100',
             'is_active' => 'nullable|in:on,1,true',
             'sync_enabled' => 'nullable|in:on,1,true'
         ]);
@@ -132,15 +217,78 @@ class SupplierController extends Controller
 
         // Sadece izin verilen alanları al
         $data = [
+            'group_id' => $request->group_id,
             'name' => $request->name,
+            'country' => $request->country,
+            'city' => $request->city,
+            'accounting_code' => $request->accounting_code,
             'types' => $request->types,
             'description' => $request->description,
             'api_endpoint' => $request->api_endpoint,
             'api_version' => $request->api_version,
             'sync_frequency' => $request->sync_frequency,
+            'payment_type' => $request->payment_type ?? 'cari',
+            'address' => $request->address,
+            'tax_rate' => $request->tax_rate ?? 0,
             'is_active' => $request->has('is_active'),
             'sync_enabled' => $request->has('sync_enabled'),
         ];
+
+        // Logo yükleme
+        if ($request->hasFile('logo')) {
+            // Eski logoyu sil
+            if ($supplier->logo) {
+                \Storage::disk('public')->delete($supplier->logo);
+            }
+            $logoPath = $request->file('logo')->store('suppliers/logos', 'public');
+            $data['logo'] = $logoPath;
+        }
+
+        // Ödeme periyodlarını işle
+        $paymentPeriods = [];
+        if ($request->payment_period_type === 'days') {
+            $paymentPeriods = [
+                'type' => 'days',
+                'before_booking' => $request->payment_days_before ?? 0,
+                'after_booking' => $request->payment_days_after ?? 0
+            ];
+        } elseif ($request->payment_period_type === 'monthly') {
+            $paymentPeriods = [
+                'type' => 'monthly',
+                'days' => $request->payment_monthly_days ?? []
+            ];
+        }
+        $data['payment_periods'] = $paymentPeriods;
+
+        // İletişim kişilerini işle
+        $contactPersons = [];
+        if ($request->contact_names) {
+            foreach ($request->contact_names as $index => $name) {
+                if ($name && isset($request->contact_phones[$index])) {
+                    $contactPersons[] = [
+                        'name' => $name,
+                        'phone' => $request->contact_phones[$index],
+                        'email' => $request->contact_emails[$index] ?? null
+                    ];
+                }
+            }
+        }
+        $data['contact_persons'] = $contactPersons;
+
+        // E-postaları işle
+        $emails = [];
+        if ($request->supplier_emails) {
+            foreach ($request->supplier_emails as $index => $email) {
+                if ($email && isset($request->supplier_email_names[$index])) {
+                    $emails[] = [
+                        'name' => $request->supplier_email_names[$index],
+                        'email' => $email,
+                        'is_primary' => $request->supplier_email_primary[$index] ?? false
+                    ];
+                }
+            }
+        }
+        $data['emails'] = $emails;
 
         // API credentials'ı JSON olarak sakla
         $apiCredentials = [];
@@ -170,17 +318,31 @@ class SupplierController extends Controller
 
     public function destroy(Supplier $supplier)
     {
-        // API entegrasyonu olan tedarikçileri sadece admin silebilir
-        if ($supplier->api_endpoint || $supplier->api_credentials) {
-            if (!auth()->user()->isAdmin()) {
-                abort(403, 'API entegrasyonu olan tedarikçileri sadece admin kullanıcılar silebilir.');
-            }
+        // Sadece admin kullanıcılar tedarikçi silebilir
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Tedarikçileri sadece admin kullanıcılar silebilir.');
+        }
+        
+        // Tedarikçinin logosunu sil
+        if ($supplier->logo) {
+            \Storage::disk('public')->delete($supplier->logo);
         }
         
         $supplier->delete();
 
         return redirect()->route('admin.suppliers.index')
             ->with('success', 'Tedarikçi başarıyla silindi.');
+    }
+
+    public function toggleStatus(Supplier $supplier)
+    {
+        $supplier->update(['is_active' => !$supplier->is_active]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Tedarikçi durumu başarıyla güncellendi.',
+            'is_active' => $supplier->is_active
+        ]);
     }
 
     public function sync(Supplier $supplier)

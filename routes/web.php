@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\HotelController;
 use App\Http\Controllers\Admin\ContractController;
 use App\Http\Controllers\Admin\CreditController;
 use App\Http\Controllers\Admin\SupplierController;
+use App\Http\Controllers\Admin\SupplierGroupController;
 use App\Http\Controllers\Admin\FirmController;
 use App\Http\Controllers\Admin\ApprovalController;
 use App\Http\Controllers\Admin\ProfitController;
@@ -32,8 +33,12 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [UserController::class, 'index'])->name('dashboard');
     
-    // Users
-    Route::resource('users', UserController::class);
+    // Users - Admin only operations
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
+    Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('users', [UserController::class, 'store'])->name('users.store');
+    Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::post('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
     Route::post('users/{user}/resend-verification', [UserController::class, 'resendVerification'])->name('users.resend-verification');
     
@@ -71,6 +76,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('approvals/{scenario}/rules', [ApprovalController::class, 'storeRule'])->name('approvals.rules.store');
     Route::delete('approvals/{scenario}/rules/{rule}', [ApprovalController::class, 'destroyRule'])->name('approvals.rules.destroy');
     
+    // Tedarikçi Grupları - Sadece Admin
+    Route::resource('supplier-groups', SupplierGroupController::class);
+    Route::post('supplier-groups/{supplierGroup}/toggle-status', [SupplierGroupController::class, 'toggleStatus'])->name('supplier-groups.toggle-status');
+    
     // Profits
     Route::prefix('profits')->name('profits.')->group(function () {
         Route::get('service-fees', [ProfitController::class, 'serviceFees'])->name('service-fees');
@@ -91,6 +100,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
 // Authenticated Routes (Tüm Giriş Yapmış Kullanıcılar Erişebilir)
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // User Profile - Tüm kullanıcılar kendi profillerini düzenleyebilir
+    Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+    
     // Suppliers - Normal kullanıcılar sadece API olmayan tedarikçileri görebilir
     Route::get('suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
     Route::get('suppliers/create', [SupplierController::class, 'create'])->name('suppliers.create');
@@ -101,6 +114,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
     Route::post('suppliers/{supplier}/sync', [SupplierController::class, 'sync'])->name('suppliers.sync');
     Route::post('suppliers/{supplier}/test-connection', [SupplierController::class, 'testConnection'])->name('suppliers.test-connection');
+    Route::post('suppliers/{supplier}/toggle-status', [SupplierController::class, 'toggleStatus'])->name('suppliers.toggle-status');
 });
 
 Route::get('/dummy', function () {

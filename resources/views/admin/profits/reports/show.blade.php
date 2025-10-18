@@ -3,7 +3,18 @@
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Kar Raporu</h1>
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Kar Raporu</h1>
+            @if(isset($report['supplier_group']))
+                <p class="text-muted mb-0">
+                    <i class="fas fa-layer-group"></i> 
+                    Tedarikçi Grubu: 
+                    <span class="badge" style="background-color: {{ $report['supplier_group']['color'] }}; color: white;">
+                        {{ $report['supplier_group']['name'] }}
+                    </span>
+                </p>
+            @endif
+        </div>
         <div>
             <button onclick="window.print()" class="btn btn-primary">
                 <i class="fas fa-print"></i> Yazdır

@@ -65,7 +65,12 @@
                             <td>{{ number_format($hotel->min_price, 2) }} ₺</td>
                             <td>
                                 @if($hotel->supplier)
-                                    <span class="badge bg-info">{{ $hotel->supplier->name }}</span>
+                                    <span class="badge bg-{{ $hotel->supplier->is_active ? 'info' : 'danger' }}">
+                                        {{ $hotel->supplier->name }}
+                                        @if(!$hotel->supplier->is_active)
+                                            <i class="fas fa-exclamation-triangle ms-1" title="Tedarikçi Pasif - Satış kanalında gösterilmez"></i>
+                                        @endif
+                                    </span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif

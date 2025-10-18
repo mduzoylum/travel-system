@@ -8,7 +8,7 @@ class Reservation extends Model
 {
     protected $fillable = [
         'user_id', 'contract_room_id', 'checkin_date', 'checkout_date',
-        'guest_count', 'total_price', 'status'
+        'guest_count', 'total_price', 'accounting_code', 'status'
     ];
 
     public function room()

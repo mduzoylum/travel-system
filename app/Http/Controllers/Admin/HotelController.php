@@ -12,13 +12,19 @@ class HotelController extends Controller
 {
     public function index()
     {
-        $hotels = Hotel::with(['supplier', 'contracts'])->paginate(15);
+        $hotels = Hotel::with(['supplier', 'contracts'])
+            ->leftJoin('suppliers', 'hotels.supplier_id', '=', 'suppliers.id')
+            ->select('hotels.*', 'suppliers.is_active as supplier_is_active')
+            ->paginate(15);
         return view('admin.hotels.index', compact('hotels'));
     }
 
     public function create()
     {
-        $suppliers = Supplier::where('is_active', true)->get();
+        // Sadece API entegrasyonu olmayan tedarikçileri göster (kontrat girişi için)
+        $suppliers = Supplier::where('is_active', true)
+            ->whereNull('api_endpoint')
+            ->get();
         return view('admin.hotels.create', compact('suppliers'));
     }
 
@@ -63,6 +69,14 @@ class HotelController extends Controller
         $data = $request->except('image');
         $data['is_active'] = $request->has('is_active');
 
+        // Tedarikçi seçildiyse, tedarikçinin muhasebe kodunu otomatik ata
+        if ($request->supplier_id) {
+            $supplier = Supplier::find($request->supplier_id);
+            if ($supplier && $supplier->accounting_code) {
+                $data['accounting_code'] = $supplier->accounting_code;
+            }
+        }
+
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('hotels', 'public');
             $data['image'] = $imagePath;
@@ -76,7 +90,10 @@ class HotelController extends Controller
 
     public function edit(Hotel $hotel)
     {
-        $suppliers = Supplier::where('is_active', true)->get();
+        // Sadece API entegrasyonu olmayan tedarikçileri göster (kontrat girişi için)
+        $suppliers = Supplier::where('is_active', true)
+            ->whereNull('api_endpoint')
+            ->get();
         return view('admin.hotels.edit', compact('hotel', 'suppliers'));
     }
 
@@ -114,6 +131,14 @@ class HotelController extends Controller
 
         $data = $request->except('image');
         $data['is_active'] = $request->has('is_active');
+
+        // Tedarikçi değiştiyse, yeni tedarikçinin muhasebe kodunu ata
+        if ($request->supplier_id && $request->supplier_id != $hotel->supplier_id) {
+            $supplier = Supplier::find($request->supplier_id);
+            if ($supplier && $supplier->accounting_code) {
+                $data['accounting_code'] = $supplier->accounting_code;
+            }
+        }
 
         if ($request->hasFile('image')) {
             // Eski resmi sil
@@ -184,6 +209,9 @@ class HotelController extends Controller
         $hotels = Hotel::where('city', $city)
             ->where('country', $country)
             ->where('is_active', true)
+            ->whereHas('supplier', function($query) {
+                $query->where('is_active', true);
+            })
             ->select('id', 'name', 'city', 'country')
             ->orderBy('name')
             ->get();

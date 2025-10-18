@@ -196,6 +196,7 @@
                                 <li><a class="dropdown-item" href="{{ route('admin.hotels.index') }}"><i class="fas fa-hotel"></i> Oteller</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.contracts.index') }}"><i class="fas fa-handshake"></i> Kontratlar</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.suppliers.index') }}"><i class="fas fa-truck"></i> Tedarikçiler</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.supplier-groups.index') }}"><i class="fas fa-layer-group"></i> Tedarikçi Grupları</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
@@ -264,8 +265,7 @@
                             {{ auth()->user()->name }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle"></i> Profil</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Ayarlar</a></li>
+                            <li><a class="dropdown-item" href="{{ route('admin.users.edit', auth()->user()->id) }}"><i class="fas fa-user-circle"></i> Profil</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="POST" class="d-inline">

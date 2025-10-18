@@ -69,28 +69,41 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $firms = Firm::where('is_active', true)->orderBy('name')->get();
-        return view('admin.users.edit', compact('user', 'firms'));
+        $isOwnProfile = auth()->user()->id === $user->id;
+        return view('admin.users.edit', compact('user', 'firms', 'isOwnProfile'));
     }
 
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $isOwnProfile = auth()->user()->id === $user->id;
+        
+        $validationRules = [
             'name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|in:admin,user,manager,supplier',
-            'phone' => 'nullable|string|max:20',
-            'firm_id' => 'nullable|exists:firms,id'
-        ]);
+            'phone' => 'nullable|string|max:20'
+        ];
+        
+        // Sadece admin kullanıcılar rol ve firma değiştirebilir
+        if (!$isOwnProfile) {
+            $validationRules['role'] = 'required|in:admin,user,manager,supplier';
+            $validationRules['firm_id'] = 'nullable|exists:firms,id';
+        }
+        
+        $request->validate($validationRules);
 
         $data = [
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $request->role,
-            'phone' => $request->phone,
-            'is_active' => $request->has('is_active'),
-            'email_verified_at' => $request->has('email_verified_at') ? now() : null
+            'phone' => $request->phone
         ];
+        
+        // Sadece admin kullanıcılar rol ve firma değiştirebilir
+        if (!$isOwnProfile) {
+            $data['role'] = $request->role;
+            $data['is_active'] = $request->has('is_active');
+            $data['email_verified_at'] = $request->has('email_verified_at') ? now() : null;
+        }
 
         // Şifre sadece değiştirilmişse güncelle
         if ($request->password) {
@@ -99,17 +112,23 @@ class UserController extends Controller
 
         $user->update($data);
 
-        // Firma ilişkisini güncelle
-        if ($request->firm_id) {
+        // Firma ilişkisini güncelle (sadece admin kullanıcılar)
+        if (!$isOwnProfile && $request->firm_id) {
             $user->firmUser()->updateOrCreate(
                 ['user_id' => $user->id],
                 ['firm_id' => $request->firm_id, 'is_active' => true]
             );
-        } else {
+        } elseif (!$isOwnProfile && !$request->firm_id) {
             $user->firmUser()->delete();
         }
 
         Log::info('User updated', ['user_id' => $user->id, 'email' => $user->email]);
+
+        // Profil sayfasından geliyorsa geri dön
+        if ($isOwnProfile) {
+            return redirect()->back()
+                ->with('success', 'Profiliniz başarıyla güncellendi.');
+        }
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Kullanıcı başarıyla güncellendi.');

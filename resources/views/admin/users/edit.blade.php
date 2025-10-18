@@ -2,11 +2,13 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Kullanıcı Düzenle</h2>
+    <h2>{{ $isOwnProfile ? 'Profil Düzenle' : 'Kullanıcı Düzenle' }}</h2>
     <div>
+        @if(!$isOwnProfile)
         <a href="{{ route('admin.users.show', $user) }}" class="btn btn-info">
             <i class="fas fa-eye"></i> Görüntüle
         </a>
+        @endif
         <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Geri Dön
         </a>
@@ -57,6 +59,7 @@
                             </div>
                         </div>
                         
+                        @if(!$isOwnProfile)
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="role" class="form-label">Rol *</label>
@@ -73,6 +76,7 @@
                                 @enderror
                             </div>
                         </div>
+                        @endif
                     </div>
                     
                     <div class="row">
@@ -96,6 +100,7 @@
                         </div>
                     </div>
                     
+                    @if(!$isOwnProfile)
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -140,6 +145,7 @@
                             </label>
                         </div>
                     </div>
+                    @endif
                     
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary">
@@ -210,6 +216,7 @@
             </div>
         </div>
         
+        @if(!$isOwnProfile)
         <div class="card mt-3">
             <div class="card-header">
                 <h6 class="card-title mb-0">Hızlı İşlemler</h6>
@@ -243,6 +250,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 </div>
 @endsection

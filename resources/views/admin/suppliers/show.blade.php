@@ -25,9 +25,14 @@
             <div class="card-header">
                 <h5 class="card-title mb-0">
                     <i class="fas fa-truck"></i> {{ $supplier->name }}
+                    @if($supplier->logo)
+                        <img src="{{ Storage::url($supplier->logo) }}" alt="Logo" class="float-end" style="max-height: 40px;">
+                    @endif
                 </h5>
             </div>
             <div class="card-body">
+                <!-- Temel Bilgiler -->
+                <h6 class="text-primary mb-3"><i class="fas fa-building"></i> Temel Bilgiler</h6>
                 <div class="row">
                     <div class="col-md-6">
                         <table class="table table-borderless">
@@ -35,8 +40,38 @@
                                 <th width="150">Tedarikçi Adı:</th>
                                 <td><strong>{{ $supplier->name }}</strong></td>
                             </tr>
+                            @if(auth()->user()->isAdmin())
+                                <tr>
+                                    <th>Grup:</th>
+                                    <td>
+                                        @if($supplier->group)
+                                            <span class="badge" style="background-color: {{ $supplier->group->color }}; color: white;">
+                                                {{ $supplier->group->name }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">Grup atanmamış</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endif
                             <tr>
-                                <th>Türler:</th>
+                                <th>Muhasebe Kodu:</th>
+                                <td>{{ $supplier->accounting_code ?: 'Belirtilmemiş' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Ülke:</th>
+                                <td>{{ $supplier->country ?: 'Belirtilmemiş' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Şehir:</th>
+                                <td>{{ $supplier->city ?: 'Belirtilmemiş' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="150">Türler:</th>
                                 <td>
                                     @if($supplier->types && count($supplier->types) > 0)
                                         @foreach($supplier->types as $type)
@@ -48,31 +83,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>API URL:</th>
-                                <td>
-                                    @if($supplier->api_url)
-                                        <code>{{ $supplier->api_url }}</code>
-                                    @else
-                                        <span class="text-muted">Belirtilmemiş</span>
-                                    @endif
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>API Versiyonu:</th>
-                                <td>
-                                    @if($supplier->api_version)
-                                        <code>{{ $supplier->api_version }}</code>
-                                    @else
-                                        <span class="text-muted">Belirtilmemiş</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <table class="table table-borderless">
-                            <tr>
-                                <th width="150">Durum:</th>
+                                <th>Durum:</th>
                                 <td>
                                     @if($supplier->is_active)
                                         <span class="badge bg-success">Aktif</span>
@@ -82,23 +93,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>Senkronizasyon:</th>
-                                <td>
-                                    <span class="badge bg-info">{{ $supplier->sync_frequency }}</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Son Sync:</th>
-                                <td>
-                                    @if($supplier->last_sync_at)
-                                        {{ $supplier->last_sync_at->format('d.m.Y H:i') }}
-                                    @else
-                                        <span class="text-muted">Hiç sync edilmemiş</span>
-                                    @endif
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Oluşturulma:</th>
+                                <th>Kayıt Tarihi:</th>
                                 <td>{{ $supplier->created_at->format('d.m.Y H:i') }}</td>
                             </tr>
                         </table>
@@ -106,134 +101,254 @@
                 </div>
                 
                 @if($supplier->description)
-                <div class="mt-4">
-                    <h6>Açıklama:</h6>
+                <div class="mb-3">
+                    <h6 class="text-primary"><i class="fas fa-info-circle"></i> Açıklama</h6>
                     <p class="text-muted">{{ $supplier->description }}</p>
                 </div>
                 @endif
-            </div>
-        </div>
-        
-        <div class="card mt-4">
-            <div class="card-header">
-                <h6 class="card-title mb-0">API Bilgileri</h6>
-            </div>
-            <div class="card-body">
+                
+                <!-- Ödeme Bilgileri -->
+                <hr class="my-4">
+                <h6 class="text-primary mb-3"><i class="fas fa-credit-card"></i> Ödeme Bilgileri</h6>
                 <div class="row">
                     <div class="col-md-6">
                         <table class="table table-borderless">
                             <tr>
-                                <th width="120">Kullanıcı Adı:</th>
+                                <th width="150">Ödeme Tipi:</th>
                                 <td>
-                                    @if($supplier->api_username)
-                                        <code>{{ $supplier->api_username }}</code>
+                                    @if($supplier->payment_type == 'cari')
+                                        <span class="badge bg-primary">Cari</span>
+                                    @elseif($supplier->payment_type == 'credit_card')
+                                        <span class="badge bg-success">Kredi Kartı</span>
                                     @else
-                                        <span class="text-muted">-</span>
+                                        <span class="text-muted">Belirtilmemiş</span>
                                     @endif
                                 </td>
                             </tr>
                             <tr>
-                                <th>API Anahtarı:</th>
+                                <th>Vergi Oranı:</th>
+                                <td>{{ $supplier->tax_rate ?? 0 }}%</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        @if($supplier->payment_periods)
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="150">Ödeme Periyodu:</th>
                                 <td>
-                                    @if($supplier->api_key)
-                                        <code>{{ Str::limit($supplier->api_key, 20) }}...</code>
+                                    @if($supplier->payment_periods['type'] == 'days')
+                                        <span class="badge bg-info">
+                                            Rezervasyon Öncesi: {{ $supplier->payment_periods['before_booking'] ?? 0 }} gün<br>
+                                            Rezervasyon Sonrası: {{ $supplier->payment_periods['after_booking'] ?? 0 }} gün
+                                        </span>
+                                    @elseif($supplier->payment_periods['type'] == 'monthly')
+                                        <span class="badge bg-info">
+                                            Ayın {{ implode(', ', $supplier->payment_periods['days'] ?? []) }}. günleri
+                                        </span>
+                                    @endif
+                                </td>
+                            </tr>
+                        </table>
+                        @endif
+                    </div>
+                </div>
+                
+                <!-- İletişim Bilgileri -->
+                <hr class="my-4">
+                <h6 class="text-primary mb-3"><i class="fas fa-phone"></i> İletişim Bilgileri</h6>
+                
+                @if($supplier->contact_persons && count($supplier->contact_persons) > 0)
+                <div class="mb-3">
+                    <h6 class="text-secondary">İletişim Yetkilileri</h6>
+                    <div class="row">
+                        @foreach($supplier->contact_persons as $person)
+                        <div class="col-md-4 mb-2">
+                            <div class="card border">
+                                <div class="card-body p-2">
+                                    <strong>{{ $person['name'] ?? 'Ad belirtilmemiş' }}</strong><br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-phone"></i> {{ $person['phone'] ?? 'Telefon belirtilmemiş' }}<br>
+                                        @if($person['email'])
+                                        <i class="fas fa-envelope"></i> {{ $person['email'] }}
+                                        @endif
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+                
+                @if($supplier->emails && count($supplier->emails) > 0)
+                <div class="mb-3">
+                    <h6 class="text-secondary">Tedarikçi E-postaları</h6>
+                    <div class="row">
+                        @foreach($supplier->emails as $email)
+                        <div class="col-md-6 mb-2">
+                            <div class="card border {{ $email['is_primary'] ? 'border-primary' : '' }}">
+                                <div class="card-body p-2">
+                                    <strong>{{ $email['name'] ?? 'Ad belirtilmemiş' }}</strong>
+                                    @if($email['is_primary'])
+                                        <span class="badge bg-primary ms-1">Ana E-posta</span>
+                                    @endif
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-envelope"></i> {{ $email['email'] ?? 'E-posta belirtilmemiş' }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+                
+                @if($supplier->address)
+                <div class="mb-3">
+                    <h6 class="text-secondary">Adres</h6>
+                    <p class="text-muted">{{ $supplier->address }}</p>
+                </div>
+                @endif
+                
+                @if(auth()->user()->isAdmin() && ($supplier->api_endpoint || $supplier->api_credentials))
+                <!-- API Entegrasyon Bilgileri -->
+                <hr class="my-4">
+                <h6 class="text-primary mb-3"><i class="fas fa-plug"></i> API Entegrasyon Bilgileri</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="150">API URL:</th>
+                                <td>
+                                    @if($supplier->api_endpoint)
+                                        <a href="{{ $supplier->api_endpoint }}" target="_blank" class="text-decoration-none">
+                                            {{ $supplier->api_endpoint }}
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
                                     @else
-                                        <span class="text-muted">-</span>
+                                        <span class="text-muted">Belirtilmemiş</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>API Versiyonu:</th>
+                                <td>{{ $supplier->api_version ?: 'Belirtilmemiş' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Senkronizasyon:</th>
+                                <td>
+                                    @if($supplier->sync_enabled)
+                                        <span class="badge bg-success">Aktif</span>
+                                        @if($supplier->sync_frequency)
+                                            ({{ ucfirst($supplier->sync_frequency) }})
+                                        @endif
+                                    @else
+                                        <span class="badge bg-secondary">Pasif</span>
                                     @endif
                                 </td>
                             </tr>
                         </table>
                     </div>
                     <div class="col-md-6">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Güvenlik:</strong> API şifresi güvenlik nedeniyle gösterilmiyor.
-                        </div>
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="150">API Kullanıcı Adı:</th>
+                                <td>
+                                    @if($supplier->api_credentials && isset($supplier->api_credentials['username']))
+                                        {{ $supplier->api_credentials['username'] }}
+                                    @else
+                                        <span class="text-muted">Belirtilmemiş</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>API Anahtarı:</th>
+                                <td>
+                                    @if($supplier->api_credentials && isset($supplier->api_credentials['api_key']))
+                                        <code>{{ Str::limit($supplier->api_credentials['api_key'], 20) }}</code>
+                                    @else
+                                        <span class="text-muted">Belirtilmemiş</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Son Senkronizasyon:</th>
+                                <td>
+                                    @if($supplier->last_sync_at)
+                                        {{ $supplier->last_sync_at->format('d.m.Y H:i') }}
+                                    @else
+                                        <span class="text-muted">Hiç yapılmamış</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     </div>
     
     <div class="col-md-4">
+        <!-- Hızlı İşlemler -->
         <div class="card">
             <div class="card-header">
                 <h6 class="card-title mb-0">Hızlı İşlemler</h6>
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
+                    <a href="{{ route('admin.suppliers.edit', $supplier) }}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Düzenle
+                    </a>
+                    
+                    @if(auth()->user()->isAdmin())
                     <button type="button" class="btn btn-success" onclick="testConnection({{ $supplier->id }})">
                         <i class="fas fa-plug"></i> Bağlantı Testi
                     </button>
+                    
                     <button type="button" class="btn btn-primary" onclick="syncSupplier({{ $supplier->id }})">
                         <i class="fas fa-sync"></i> Senkronize Et
                     </button>
-                    <form action="{{ route('admin.suppliers.destroy', $supplier) }}" method="POST" onsubmit="return confirm('Bu tedarikçiyi silmek istediğinizden emin misiniz?')">
+                    @endif
+                    
+                    <button type="button" class="btn btn-{{ $supplier->is_active ? 'secondary' : 'success' }}" 
+                            onclick="toggleSupplierStatus({{ $supplier->id }})">
+                        <i class="fas fa-{{ $supplier->is_active ? 'pause' : 'play' }}"></i> 
+                        {{ $supplier->is_active ? 'Pasif Yap' : 'Aktif Yap' }}
+                    </button>
+                    
+                    @if(auth()->user()->isAdmin())
+                    <form action="{{ route('admin.suppliers.destroy', $supplier) }}" method="POST" 
+                          onsubmit="return confirm('Bu tedarikçiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve tedarikçiye bağlı tüm veriler silinecektir!')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger w-100">
                             <i class="fas fa-trash"></i> Tedarikçiyi Sil
                         </button>
                     </form>
+                    @endif
                 </div>
             </div>
         </div>
         
+        <!-- İstatistikler -->
         <div class="card mt-3">
             <div class="card-header">
                 <h6 class="card-title mb-0">İstatistikler</h6>
             </div>
             <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-12">
-                        <h4 class="text-primary">{{ $supplier->hotels->count() ?? 0 }}</h4>
-                        <small class="text-muted">Otel</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        @if($supplier->hotels->count() > 0)
-        <div class="card mt-3">
-            <div class="card-header">
-                <h6 class="card-title mb-0">Son Eklenen Oteller</h6>
-            </div>
-            <div class="card-body">
-                <div class="list-group list-group-flush">
-                    @foreach($supplier->hotels->take(5) as $hotel)
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-1">{{ $hotel->name }}</h6>
-                            <small class="text-muted">{{ $hotel->city }}, {{ $hotel->country }}</small>
-                        </div>
-                        <span class="badge bg-warning rounded-pill">{{ $hotel->stars }} ★</span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-        @endif
-    </div>
-</div>
-
-<!-- Sync Modal -->
-<div class="modal fade" id="syncModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Tedarikçi Senkronizasyonu</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="syncProgress" class="d-none">
-                    <div class="text-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Senkronize ediliyor...</span>
-                        </div>
-                        <p class="mt-2">Tedarikçi verileri senkronize ediliyor...</p>
-                    </div>
-                </div>
-                <div id="syncResult"></div>
+                <table class="table table-borderless">
+                    <tr>
+                        <th>Toplam Otel:</th>
+                        <td><span class="badge bg-info">{{ $supplier->hotels->count() }}</span></td>
+                    </tr>
+                    <tr>
+                        <th>Son Güncelleme:</th>
+                        <td>{{ $supplier->updated_at->format('d.m.Y H:i') }}</td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
@@ -243,72 +358,37 @@
 @push('scripts')
 <script>
 function testConnection(supplierId) {
-    fetch(`/admin/suppliers/${supplierId}/test-connection`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Bağlantı başarılı!');
-        } else {
-            alert('Bağlantı hatası: ' + data.message);
-        }
-    })
-    .catch(error => {
-        alert('Bağlantı testi sırasında hata oluştu.');
-    });
+    // Bağlantı testi fonksiyonu
+    alert('Bağlantı testi özelliği yakında eklenecek!');
 }
 
 function syncSupplier(supplierId) {
-    const modal = new bootstrap.Modal(document.getElementById('syncModal'));
-    const progress = document.getElementById('syncProgress');
-    const result = document.getElementById('syncResult');
-    
-    modal.show();
-    progress.classList.remove('d-none');
-    result.innerHTML = '';
-    
-    fetch(`/admin/suppliers/${supplierId}/sync`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        progress.classList.add('d-none');
-        if (data.success) {
-            result.innerHTML = `
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> Senkronizasyon başarılı!
-                    <br>${data.message}
-                </div>
-            `;
-            setTimeout(() => {
+    // Senkronizasyon fonksiyonu
+    alert('Senkronizasyon özelliği yakında eklenecek!');
+}
+
+function toggleSupplierStatus(supplierId) {
+    if (confirm('Tedarikçi durumunu değiştirmek istediğinizden emin misiniz?')) {
+        fetch(`/admin/suppliers/${supplierId}/toggle-status`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                 location.reload();
-            }, 2000);
-        } else {
-            result.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i> Senkronizasyon hatası!
-                    <br>${data.message}
-                </div>
-            `;
-        }
-    })
-    .catch(error => {
-        progress.classList.add('d-none');
-        result.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i> Senkronizasyon sırasında hata oluştu.
-            </div>
-        `;
-    });
+            } else {
+                alert('Hata: ' + (data.message || 'Bilinmeyen hata'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
 }
 </script>
-@endpush 
+@endpush

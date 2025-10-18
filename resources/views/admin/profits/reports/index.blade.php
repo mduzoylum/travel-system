@@ -15,7 +15,7 @@
                 @csrf
                 
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="mb-3">
                             <label for="firm_id" class="form-label">Firma *</label>
                             <select class="form-select @error('firm_id') is-invalid @enderror" id="firm_id" name="firm_id" required>
@@ -32,7 +32,25 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="supplier_group_id" class="form-label">Tedarikçi Grubu</label>
+                            <select class="form-select @error('supplier_group_id') is-invalid @enderror" id="supplier_group_id" name="supplier_group_id">
+                                <option value="">Tüm Gruplar</option>
+                                @foreach($supplierGroups as $group)
+                                    <option value="{{ $group->id }}" {{ old('supplier_group_id') == $group->id ? 'selected' : '' }}>
+                                        {{ $group->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Belirli tedarikçi grubuna göre filtrele</small>
+                            @error('supplier_group_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
                         <div class="mb-3">
                             <label for="start_date" class="form-label">Başlangıç Tarihi *</label>
                             <input type="date" class="form-control @error('start_date') is-invalid @enderror" 
@@ -43,7 +61,7 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="mb-3">
                             <label for="end_date" class="form-label">Bitiş Tarihi *</label>
                             <input type="date" class="form-control @error('end_date') is-invalid @enderror" 
@@ -209,6 +227,12 @@ function generateMonthlyReport() {
     firmId.value = firmSelect.value;
     form.appendChild(firmId);
     
+    const supplierGroupId = document.createElement('input');
+    supplierGroupId.type = 'hidden';
+    supplierGroupId.name = 'supplier_group_id';
+    supplierGroupId.value = document.getElementById('supplier_group_id').value;
+    form.appendChild(supplierGroupId);
+    
     const startDate = document.createElement('input');
     startDate.type = 'hidden';
     startDate.name = 'start_date';
@@ -255,6 +279,12 @@ function generateSupplierReport() {
     firmId.name = 'firm_id';
     firmId.value = firmSelect.value;
     form.appendChild(firmId);
+    
+    const supplierGroupId = document.createElement('input');
+    supplierGroupId.type = 'hidden';
+    supplierGroupId.name = 'supplier_group_id';
+    supplierGroupId.value = document.getElementById('supplier_group_id').value;
+    form.appendChild(supplierGroupId);
     
     const startDate = document.createElement('input');
     startDate.type = 'hidden';

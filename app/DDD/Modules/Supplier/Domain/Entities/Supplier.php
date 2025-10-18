@@ -9,13 +9,24 @@ use App\DDD\Modules\Supplier\Domain\ValueObjects\ApiCredentials;
 class Supplier extends Model
 {
     protected $fillable = [
+        'group_id',
         'name',
+        'country',
+        'city',
+        'accounting_code',
         'types',
         'description',
         'api_endpoint',
         'api_version',
         'api_credentials',
         'sync_frequency',
+        'payment_periods',
+        'payment_type',
+        'contact_persons',
+        'address',
+        'logo',
+        'tax_rate',
+        'emails',
         'is_active',
         'sync_enabled',
         'last_sync_at'
@@ -24,14 +35,23 @@ class Supplier extends Model
     protected $casts = [
         'types' => 'array',
         'api_credentials' => 'array',
+        'payment_periods' => 'array',
+        'contact_persons' => 'array',
+        'emails' => 'array',
         'is_active' => 'boolean',
         'sync_enabled' => 'boolean',
-        'last_sync_at' => 'datetime'
+        'last_sync_at' => 'datetime',
+        'tax_rate' => 'decimal:2'
     ];
 
     public function hotels()
     {
         return $this->hasMany(\App\DDD\Modules\Contract\Models\Hotel::class);
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(\App\Models\SupplierGroup::class);
     }
 
     public function contracts()

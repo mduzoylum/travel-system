@@ -8,7 +8,7 @@ class Hotel extends Model
 {
     protected $fillable = [
         'name', 'city', 'country', 'address', 'stars', 'min_price', 'is_contracted', 
-        'description', 'supplier_id', 'external_id', 'image', 'is_active'
+        'description', 'supplier_id', 'accounting_code', 'external_id', 'image', 'is_active'
     ];
 
     public function contracts()

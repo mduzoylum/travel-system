@@ -32,7 +32,10 @@ class ProfitController extends Controller
     public function create()
     {
         $firms = Firm::where('is_active', true)->get();
-        $suppliers = Supplier::where('is_active', true)->get();
+        // Sadece API entegrasyonu olmayan tedarikçileri göster (kontrat girişi için)
+        $suppliers = Supplier::where('is_active', true)
+            ->whereNull('api_endpoint')
+            ->get();
         return view('admin.profits.create', compact('firms', 'suppliers'));
     }
 
@@ -268,7 +271,8 @@ class ProfitController extends Controller
     public function reports()
     {
         $firms = Firm::where('is_active', true)->get();
-        return view('admin.profits.reports.index', compact('firms'));
+        $supplierGroups = \App\Models\SupplierGroup::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        return view('admin.profits.reports.index', compact('firms', 'supplierGroups'));
     }
 
     public function generateReport(Request $request)
@@ -276,13 +280,15 @@ class ProfitController extends Controller
         $request->validate([
             'firm_id' => 'required|exists:firms,id',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date'
+            'end_date' => 'required|date|after:start_date',
+            'supplier_group_id' => 'nullable|exists:supplier_groups,id'
         ]);
 
         $report = $this->profitService->generateProfitReport(
             $request->firm_id,
             $request->start_date,
-            $request->end_date
+            $request->end_date,
+            $request->supplier_group_id
         );
 
         return view('admin.profits.reports.show', compact('report'));
