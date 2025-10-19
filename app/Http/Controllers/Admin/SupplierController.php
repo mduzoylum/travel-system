@@ -15,14 +15,17 @@ class SupplierController extends Controller
 {
     public function index()
     {
-        // Admin olmayan kullanıcılar sadece API entegrasyonu olmayan tedarikçileri görebilir
+        // Admin olmayan kullanıcılar sadece manuel tedarikçileri görebilir
         if (!auth()->user()->isAdmin()) {
             $suppliers = Supplier::with('group')
                 ->whereNull('api_endpoint')
+                ->whereNull('api_credentials')
+                ->whereNull('deleted_at')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
         } else {
             $suppliers = Supplier::with('group')
+                ->whereNull('deleted_at')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
         }
@@ -154,9 +157,10 @@ class SupplierController extends Controller
 
     public function show(Supplier $supplier)
     {
-        // Admin olmayan kullanıcılar XML/API entegrasyonu olan tedarikçileri görüntüleyemez
-        if (!auth()->user()->isAdmin() && ($supplier->api_endpoint || $supplier->api_credentials)) {
-            abort(403, 'Bu tedarikçiye erişim yetkiniz yok. Sadece admin kullanıcılar XML entegrasyonu olan tedarikçileri görüntüleyebilir.');
+        // Admin olmayan kullanıcılar XML tedarikçilerini görüntüleyemez
+        // 403 hatası yerine 404 döndür (tedarikçi bulunamadı gibi görünsün)
+        if (!auth()->user()->isAdmin() && $supplier->isXmlSupplier()) {
+            abort(404, 'Tedarikçi bulunamadı.');
         }
         
         $supplier->load(['hotels', 'group']);
@@ -165,10 +169,10 @@ class SupplierController extends Controller
 
     public function edit(Supplier $supplier)
     {
-        // API entegrasyonu olan tedarikçileri sadece admin düzenleyebilir
-        if ($supplier->api_endpoint || $supplier->api_credentials) {
+        // XML tedarikçileri sadece admin düzenleyebilir
+        if ($supplier->isXmlSupplier()) {
             if (!auth()->user()->isAdmin()) {
-                abort(403, 'API entegrasyonu olan tedarikçileri sadece admin kullanıcılar düzenleyebilir.');
+                abort(403, 'XML entegrasyonu olan tedarikçileri sadece admin kullanıcılar düzenleyebilir.');
             }
         }
         

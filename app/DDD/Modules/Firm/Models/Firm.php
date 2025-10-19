@@ -16,11 +16,13 @@ class Firm extends Model
         'email_domain',
         'is_active',
         'service_fee',
+        'settings',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'service_fee' => 'decimal:2',
+        'settings' => 'array',
     ];
 
     public function firmUsers()

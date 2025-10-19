@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\SupplierGroupController;
 use App\Http\Controllers\Admin\FirmController;
 use App\Http\Controllers\Admin\ApprovalController;
 use App\Http\Controllers\Admin\ProfitController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\ApprovalController as PublicApprovalController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Tedarikçi Grupları - Sadece Admin
     Route::resource('supplier-groups', SupplierGroupController::class);
     Route::post('supplier-groups/{supplierGroup}/toggle-status', [SupplierGroupController::class, 'toggleStatus'])->name('supplier-groups.toggle-status');
+    
+    // Settings - Sadece Admin
+    Route::get('settings', [SettingsController::class, 'index'])->name('settings');
+    Route::put('settings/firm/{firm}', [SettingsController::class, 'updateFirmSettings'])->name('settings.firm.update');
+    Route::put('settings/supplier/{supplier}', [SettingsController::class, 'updateSupplierSettings'])->name('settings.supplier.update');
+    Route::put('settings/system', [SettingsController::class, 'updateSystemSettings'])->name('settings.system.update');
     
     // Profits
     Route::prefix('profits')->name('profits.')->group(function () {

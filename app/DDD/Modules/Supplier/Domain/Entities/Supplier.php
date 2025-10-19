@@ -3,11 +3,13 @@
 namespace App\DDD\Modules\Supplier\Domain\Entities;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\DDD\Modules\Supplier\Domain\ValueObjects\SupplierType;
 use App\DDD\Modules\Supplier\Domain\ValueObjects\ApiCredentials;
 
 class Supplier extends Model
 {
+    use SoftDeletes;
     protected $fillable = [
         'group_id',
         'name',
@@ -29,7 +31,11 @@ class Supplier extends Model
         'emails',
         'is_active',
         'sync_enabled',
-        'last_sync_at'
+        'last_sync_at',
+        'auto_sync_enabled',
+        'notification_enabled',
+        'max_daily_bookings',
+        'priority_level'
     ];
 
     protected $casts = [
@@ -41,7 +47,11 @@ class Supplier extends Model
         'is_active' => 'boolean',
         'sync_enabled' => 'boolean',
         'last_sync_at' => 'datetime',
-        'tax_rate' => 'decimal:2'
+        'tax_rate' => 'decimal:2',
+        'auto_sync_enabled' => 'boolean',
+        'notification_enabled' => 'boolean',
+        'max_daily_bookings' => 'integer',
+        'priority_level' => 'integer'
     ];
 
     public function hotels()
@@ -77,6 +87,22 @@ class Supplier extends Model
     public function getApiCredentials(): ApiCredentials
     {
         return new ApiCredentials($this->api_credentials);
+    }
+
+    /**
+     * Tedarikçinin XML/API entegrasyonu olup olmadığını kontrol et
+     */
+    public function isXmlSupplier(): bool
+    {
+        return !empty($this->api_endpoint) || !empty($this->api_credentials);
+    }
+
+    /**
+     * Tedarikçinin manuel (kontrat girişi için uygun) olup olmadığını kontrol et
+     */
+    public function isManualSupplier(): bool
+    {
+        return empty($this->api_endpoint) && empty($this->api_credentials);
     }
 
     public function hasType(string $type): bool

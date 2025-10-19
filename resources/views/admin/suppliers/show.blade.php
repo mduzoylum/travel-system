@@ -321,7 +321,7 @@
                     
                     @if(auth()->user()->isAdmin())
                     <form action="{{ route('admin.suppliers.destroy', $supplier) }}" method="POST" 
-                          onsubmit="return confirm('Bu tedarikçiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve tedarikçiye bağlı tüm veriler silinecektir!')">
+onsubmit="return confirm('Bu tedarikçiyi arşivlemek istediğinizden emin misiniz? Tedarikçi arşivlenecek ancak bağlı rezervasyon kayıtları korunacaktır.')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger w-100">

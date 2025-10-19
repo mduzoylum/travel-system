@@ -14,6 +14,8 @@ class HotelController extends Controller
     {
         $hotels = Hotel::with(['supplier', 'contracts'])
             ->leftJoin('suppliers', 'hotels.supplier_id', '=', 'suppliers.id')
+            ->where('suppliers.is_active', true) // Sadece aktif tedarikçilerin otellerini göster
+            ->whereNull('suppliers.deleted_at') // Soft delete edilmemiş tedarikçiler
             ->select('hotels.*', 'suppliers.is_active as supplier_is_active')
             ->paginate(15);
         return view('admin.hotels.index', compact('hotels'));
@@ -21,9 +23,11 @@ class HotelController extends Controller
 
     public function create()
     {
-        // Sadece API entegrasyonu olmayan tedarikçileri göster (kontrat girişi için)
+        // Sadece manuel tedarikçileri göster (kontrat girişi için)
         $suppliers = Supplier::where('is_active', true)
             ->whereNull('api_endpoint')
+            ->whereNull('api_credentials')
+            ->whereNull('deleted_at')
             ->get();
         return view('admin.hotels.create', compact('suppliers'));
     }
@@ -90,9 +94,11 @@ class HotelController extends Controller
 
     public function edit(Hotel $hotel)
     {
-        // Sadece API entegrasyonu olmayan tedarikçileri göster (kontrat girişi için)
+        // Sadece manuel tedarikçileri göster (kontrat girişi için)
         $suppliers = Supplier::where('is_active', true)
             ->whereNull('api_endpoint')
+            ->whereNull('api_credentials')
+            ->whereNull('deleted_at')
             ->get();
         return view('admin.hotels.edit', compact('hotel', 'suppliers'));
     }
@@ -210,7 +216,8 @@ class HotelController extends Controller
             ->where('country', $country)
             ->where('is_active', true)
             ->whereHas('supplier', function($query) {
-                $query->where('is_active', true);
+                $query->where('is_active', true)
+                      ->whereNull('deleted_at'); // Soft delete edilmemiş tedarikçiler
             })
             ->select('id', 'name', 'city', 'country')
             ->orderBy('name')

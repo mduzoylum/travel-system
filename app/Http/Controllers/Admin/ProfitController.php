@@ -32,9 +32,11 @@ class ProfitController extends Controller
     public function create()
     {
         $firms = Firm::where('is_active', true)->get();
-        // Sadece API entegrasyonu olmayan tedarikçileri göster (kontrat girişi için)
+        // Sadece manuel tedarikçileri göster (kontrat girişi için)
         $suppliers = Supplier::where('is_active', true)
             ->whereNull('api_endpoint')
+            ->whereNull('api_credentials')
+            ->whereNull('deleted_at')
             ->get();
         return view('admin.profits.create', compact('firms', 'suppliers'));
     }
@@ -135,6 +137,7 @@ class ProfitController extends Controller
             'description' => 'nullable|string',
             'firm_id' => 'nullable|exists:firms,id',
             'service_type' => 'required|in:reservation,cancellation,modification,booking',
+            'product_type' => 'required|in:hotel,flight,car,activity,transfer,all',
             'fee_type' => 'required|in:percentage,fixed',
             'fee_value' => 'required|numeric|min:0',
             'min_amount' => 'nullable|numeric|min:0',
@@ -172,6 +175,7 @@ class ProfitController extends Controller
             'description' => 'nullable|string',
             'firm_id' => 'nullable|exists:firms,id',
             'service_type' => 'required|in:reservation,cancellation,modification,booking',
+            'product_type' => 'required|in:hotel,flight,car,activity,transfer,all',
             'fee_type' => 'required|in:percentage,fixed',
             'fee_value' => 'required|numeric|min:0',
             'min_amount' => 'nullable|numeric|min:0',

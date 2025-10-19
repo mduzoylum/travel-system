@@ -86,6 +86,15 @@ class ProfitCalculationService
                       ->orWhereNull('firm_id');
             })
             ->where('service_type', $data['service_type'] ?? 'reservation')
+            ->where(function ($query) use ($data) {
+                // Ürün tipi kontrolü
+                if (isset($data['product_type'])) {
+                    $query->where('product_type', $data['product_type'])
+                          ->orWhere('product_type', 'all');
+                } else {
+                    $query->where('product_type', 'all');
+                }
+            })
             ->orderBy('priority', 'desc')
             ->get();
 

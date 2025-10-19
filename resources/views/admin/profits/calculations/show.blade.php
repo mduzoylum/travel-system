@@ -33,9 +33,16 @@
                         <tr>
                             <td><strong>Tedarikçi:</strong></td>
                             <td>
-                                <a href="{{ route('admin.suppliers.show', $calculation->supplier) }}">
-                                    {{ $calculation->supplier->name }}
-                                </a>
+                                @if($calculation->supplier->trashed())
+                                    <span class="text-danger">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        {{ $calculation->supplier->name }} (Silinmiş)
+                                    </span>
+                                @else
+                                    <a href="{{ route('admin.suppliers.show', $calculation->supplier) }}">
+                                        {{ $calculation->supplier->name }}
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                         @endif

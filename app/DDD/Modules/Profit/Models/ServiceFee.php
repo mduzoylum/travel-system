@@ -8,7 +8,7 @@ use App\DDD\Modules\Firm\Models\Firm;
 class ServiceFee extends Model
 {
     protected $fillable = [
-        'name', 'description', 'firm_id', 'service_type', 'fee_type',
+        'name', 'description', 'firm_id', 'service_type', 'product_type', 'fee_type',
         'fee_value', 'min_amount', 'max_amount', 'currency', 'is_active', 'is_mandatory', 'priority'
     ];
 

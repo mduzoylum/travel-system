@@ -266,6 +266,9 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ route('admin.users.edit', auth()->user()->id) }}"><i class="fas fa-user-circle"></i> Profil</a></li>
+                            @if(auth()->user()->isAdmin())
+                            <li><a class="dropdown-item" href="{{ route('admin.settings') }}"><i class="fas fa-cog"></i> Ayarlar</a></li>
+                            @endif
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="POST" class="d-inline">

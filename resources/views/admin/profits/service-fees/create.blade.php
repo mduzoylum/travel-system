@@ -74,12 +74,16 @@
                     
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="fee_type" class="form-label">Ücret Tipi *</label>
-                            <select class="form-select @error('fee_type') is-invalid @enderror" id="fee_type" name="fee_type" required>
-                                <option value="percentage" {{ old('fee_type') == 'percentage' ? 'selected' : '' }}>Yüzde</option>
-                                <option value="fixed" {{ old('fee_type') == 'fixed' ? 'selected' : '' }}>Sabit</option>
+                            <label for="product_type" class="form-label">Ürün Tipi *</label>
+                            <select class="form-select @error('product_type') is-invalid @enderror" id="product_type" name="product_type" required>
+                                <option value="all" {{ old('product_type') == 'all' ? 'selected' : '' }}>Tüm Ürünler</option>
+                                <option value="hotel" {{ old('product_type') == 'hotel' ? 'selected' : '' }}>Otel</option>
+                                <option value="flight" {{ old('product_type') == 'flight' ? 'selected' : '' }}>Uçak</option>
+                                <option value="car" {{ old('product_type') == 'car' ? 'selected' : '' }}>Araç Kiralama</option>
+                                <option value="activity" {{ old('product_type') == 'activity' ? 'selected' : '' }}>Aktivite</option>
+                                <option value="transfer" {{ old('product_type') == 'transfer' ? 'selected' : '' }}>Transfer</option>
                             </select>
-                            @error('fee_type')
+                            @error('product_type')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -87,14 +91,12 @@
                     
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="currency" class="form-label">Para Birimi *</label>
-                            <select class="form-select @error('currency') is-invalid @enderror" id="currency" name="currency" required>
-                                <option value="TRY" {{ old('currency') == 'TRY' ? 'selected' : '' }}>TRY</option>
-                                <option value="USD" {{ old('currency') == 'USD' ? 'selected' : '' }}>USD</option>
-                                <option value="EUR" {{ old('currency') == 'EUR' ? 'selected' : '' }}>EUR</option>
-                                <option value="GBP" {{ old('currency') == 'GBP' ? 'selected' : '' }}>GBP</option>
+                            <label for="fee_type" class="form-label">Ücret Tipi *</label>
+                            <select class="form-select @error('fee_type') is-invalid @enderror" id="fee_type" name="fee_type" required>
+                                <option value="percentage" {{ old('fee_type') == 'percentage' ? 'selected' : '' }}>Yüzde</option>
+                                <option value="fixed" {{ old('fee_type') == 'fixed' ? 'selected' : '' }}>Sabit</option>
                             </select>
-                            @error('currency')
+                            @error('fee_type')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
