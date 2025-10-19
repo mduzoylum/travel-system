@@ -36,19 +36,21 @@
                 @if(auth()->user()->isAdmin())
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="group_id" class="form-label">Grup</label>
-                            <select class="form-select @error('group_id') is-invalid @enderror" 
-                                    id="group_id" name="group_id">
-                                <option value="">Grup Seçiniz (Opsiyonel)</option>
+                            <label for="group_ids" class="form-label">Tedarikçi Grupları</label>
+                            <select class="form-select @error('group_ids') is-invalid @enderror" 
+                                    id="group_ids" name="group_ids[]" multiple>
                                 @foreach($groups as $group)
                                     <option value="{{ $group->id }}" 
-                                            {{ old('group_id', $supplier->group_id) == $group->id ? 'selected' : '' }}>
-                                        {{ $group->name }}
+                                            {{ in_array($group->id, old('group_ids', $supplier->groups->pluck('id')->toArray())) ? 'selected' : '' }}
+                                            data-group-type="{{ $group->group_type }}">
+                                        {{ $group->name }} ({{ $group->group_type_label }})
                                     </option>
                                 @endforeach
                             </select>
-                            <small class="form-text text-muted">Raporlama için tedarikçi grubu</small>
-                            @error('group_id')
+                            <small class="form-text text-muted">
+                                Birden fazla grup seçebilirsiniz. Rapor gruplarında çoklu atama, kar gruplarında tek atama yapılır.
+                            </small>
+                            @error('group_ids')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

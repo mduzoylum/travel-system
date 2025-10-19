@@ -272,10 +272,19 @@ class ProfitController extends Controller
     }
 
     // Kar raporları
-    public function reports()
+    public function reports(Request $request)
     {
         $firms = Firm::where('is_active', true)->get();
-        $supplierGroups = \App\Models\SupplierGroup::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        
+        $query = \App\Models\SupplierGroup::where('is_active', true);
+        
+        // Grup tipi filtresi
+        if ($request->has('group_type') && $request->group_type) {
+            $query->where('group_type', $request->group_type);
+        }
+        
+        $supplierGroups = $query->orderBy('sort_order')->orderBy('name')->get();
+        
         return view('admin.profits.reports.index', compact('firms', 'supplierGroups'));
     }
 
@@ -285,14 +294,16 @@ class ProfitController extends Controller
             'firm_id' => 'required|exists:firms,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'supplier_group_id' => 'nullable|exists:supplier_groups,id'
+            'supplier_group_id' => 'nullable|exists:supplier_groups,id',
+            'group_type' => 'nullable|in:report,profit,xml,manual'
         ]);
 
         $report = $this->profitService->generateProfitReport(
             $request->firm_id,
             $request->start_date,
             $request->end_date,
-            $request->supplier_group_id
+            $request->supplier_group_id,
+            $request->group_type
         );
 
         return view('admin.profits.reports.show', compact('report'));

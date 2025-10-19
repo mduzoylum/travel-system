@@ -13,10 +13,16 @@ class SupplierGroupController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $groups = SupplierGroup::withCount('suppliers')
-            ->orderBy('sort_order')
+        $query = SupplierGroup::withCount('suppliers');
+        
+        // Grup tipi filtresi
+        if ($request->has('group_type') && $request->group_type) {
+            $query->where('group_type', $request->group_type);
+        }
+        
+        $groups = $query->orderBy('sort_order')
             ->orderBy('name')
             ->paginate(15);
         
@@ -40,7 +46,8 @@ class SupplierGroupController extends Controller
             'name' => 'required|string|max:100|unique:supplier_groups,name',
             'description' => 'nullable|string',
             'color' => 'required|string',
-            'sort_order' => 'integer|min:0'
+            'sort_order' => 'integer|min:0',
+            'group_type' => 'required|in:report,profit,xml,manual'
         ]);
 
         $data = $request->all();
@@ -84,7 +91,8 @@ class SupplierGroupController extends Controller
             'name' => 'required|string|max:100|unique:supplier_groups,name,' . $supplierGroup->id,
             'description' => 'nullable|string',
             'color' => 'required|string',
-            'sort_order' => 'integer|min:0'
+            'sort_order' => 'integer|min:0',
+            'group_type' => 'required|in:report,profit,xml,manual'
         ]);
 
         $data = $request->all();

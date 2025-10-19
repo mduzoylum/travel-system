@@ -38,13 +38,31 @@
                             <select class="form-select @error('supplier_group_id') is-invalid @enderror" id="supplier_group_id" name="supplier_group_id">
                                 <option value="">Tüm Gruplar</option>
                                 @foreach($supplierGroups as $group)
-                                    <option value="{{ $group->id }}" {{ old('supplier_group_id') == $group->id ? 'selected' : '' }}>
-                                        {{ $group->name }}
+                                    <option value="{{ $group->id }}" {{ old('supplier_group_id') == $group->id ? 'selected' : '' }}
+                                            data-group-type="{{ $group->group_type }}">
+                                        {{ $group->name }} ({{ $group->group_type_label }})
                                     </option>
                                 @endforeach
                             </select>
                             <small class="form-text text-muted">Belirli tedarikçi grubuna göre filtrele</small>
                             @error('supplier_group_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="group_type" class="form-label">Grup Tipi</label>
+                            <select class="form-select @error('group_type') is-invalid @enderror" id="group_type" name="group_type">
+                                <option value="">Tüm Tipler</option>
+                                <option value="report" {{ old('group_type') == 'report' ? 'selected' : '' }}>Rapor Grupları</option>
+                                <option value="profit" {{ old('group_type') == 'profit' ? 'selected' : '' }}>Kar Grupları</option>
+                                <option value="xml" {{ old('group_type') == 'xml' ? 'selected' : '' }}>XML Tedarikçiler</option>
+                                <option value="manual" {{ old('group_type') == 'manual' ? 'selected' : '' }}>Manuel Tedarikçiler</option>
+                            </select>
+                            <small class="form-text text-muted">Grup tipine göre filtrele</small>
+                            @error('group_type')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -302,5 +320,38 @@ function generateSupplierReport() {
     document.body.appendChild(form);
     form.submit();
 }
+
+// Grup tipi filtreleme
+document.getElementById('group_type').addEventListener('change', function() {
+    const groupType = this.value;
+    const supplierGroupSelect = document.getElementById('supplier_group_id');
+    const options = supplierGroupSelect.querySelectorAll('option');
+    
+    // Tüm seçenekleri göster
+    options.forEach(option => {
+        option.style.display = '';
+    });
+    
+    // Grup tipi seçilmişse filtrele
+    if (groupType) {
+        options.forEach(option => {
+            if (option.value === '') {
+                // "Tüm Gruplar" seçeneğini her zaman göster
+                option.style.display = '';
+            } else {
+                const optionGroupType = option.getAttribute('data-group-type');
+                if (optionGroupType !== groupType) {
+                    option.style.display = 'none';
+                }
+            }
+        });
+        
+        // Eğer seçili grup filtrelenmişse, seçimi temizle
+        const selectedOption = supplierGroupSelect.options[supplierGroupSelect.selectedIndex];
+        if (selectedOption && selectedOption.getAttribute('data-group-type') !== groupType) {
+            supplierGroupSelect.value = '';
+        }
+    }
+});
 </script>
 @endsection 

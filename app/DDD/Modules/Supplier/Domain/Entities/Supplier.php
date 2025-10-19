@@ -11,7 +11,6 @@ class Supplier extends Model
 {
     use SoftDeletes;
     protected $fillable = [
-        'group_id',
         'name',
         'country',
         'city',
@@ -59,9 +58,34 @@ class Supplier extends Model
         return $this->hasMany(\App\DDD\Modules\Contract\Models\Hotel::class);
     }
 
-    public function group()
+    public function groups()
     {
-        return $this->belongsTo(\App\Models\SupplierGroup::class);
+        return $this->belongsToMany(\App\Models\SupplierGroup::class, 'supplier_group_members');
+    }
+
+    /**
+     * Belirli tipte grupları getir
+     */
+    public function groupsByType(string $type)
+    {
+        return $this->belongsToMany(\App\Models\SupplierGroup::class, 'supplier_group_members')
+                    ->where('group_type', $type);
+    }
+
+    /**
+     * Rapor grupları
+     */
+    public function reportGroups()
+    {
+        return $this->groupsByType('report');
+    }
+
+    /**
+     * Kar grupları
+     */
+    public function profitGroups()
+    {
+        return $this->groupsByType('profit');
     }
 
     public function contracts()

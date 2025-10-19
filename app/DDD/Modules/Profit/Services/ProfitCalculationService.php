@@ -224,7 +224,7 @@ class ProfitCalculationService
     /**
      * Firma için kar raporu oluştur
      */
-    public function generateProfitReport(int $firmId, string $startDate, string $endDate, ?int $supplierGroupId = null): array
+    public function generateProfitReport(int $firmId, string $startDate, string $endDate, ?int $supplierGroupId = null, ?string $groupType = null): array
     {
         $query = ProfitCalculation::where('firm_id', $firmId)
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -233,7 +233,18 @@ class ProfitCalculationService
         // Tedarikçi grubu filtresi
         if ($supplierGroupId) {
             $query->whereHas('supplier', function($q) use ($supplierGroupId) {
-                $q->where('group_id', $supplierGroupId);
+                $q->whereHas('groups', function($groupQuery) use ($supplierGroupId) {
+                    $groupQuery->where('supplier_groups.id', $supplierGroupId);
+                });
+            });
+        }
+        
+        // Grup tipi filtresi
+        if ($groupType) {
+            $query->whereHas('supplier', function($q) use ($groupType) {
+                $q->whereHas('groups', function($groupQuery) use ($groupType) {
+                    $groupQuery->where('supplier_groups.group_type', $groupType);
+                });
             });
         }
         
@@ -270,9 +281,25 @@ class ProfitCalculationService
                 $report['supplier_group'] = [
                     'id' => $supplierGroup->id,
                     'name' => $supplierGroup->name,
-                    'color' => $supplierGroup->color
+                    'color' => $supplierGroup->color,
+                    'group_type' => $supplierGroup->group_type,
+                    'group_type_label' => $supplierGroup->group_type_label
                 ];
             }
+        }
+        
+        // Grup tipi bilgisini ekle
+        if ($groupType) {
+            $report['group_type'] = [
+                'type' => $groupType,
+                'label' => match($groupType) {
+                    'report' => 'Rapor Grubu',
+                    'profit' => 'Kar Grubu',
+                    'xml' => 'XML Tedarikçi',
+                    'manual' => 'Manuel Tedarikçi',
+                    default => 'Bilinmiyor'
+                }
+            ];
         }
 
         return $report;

@@ -17,14 +17,14 @@ class SupplierController extends Controller
     {
         // Admin olmayan kullanıcılar sadece manuel tedarikçileri görebilir
         if (!auth()->user()->isAdmin()) {
-            $suppliers = Supplier::with('group')
+            $suppliers = Supplier::with('groups')
                 ->whereNull('api_endpoint')
                 ->whereNull('api_credentials')
                 ->whereNull('deleted_at')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
         } else {
-            $suppliers = Supplier::with('group')
+            $suppliers = Supplier::with('groups')
                 ->whereNull('deleted_at')
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
@@ -42,7 +42,8 @@ class SupplierController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'group_id' => 'nullable|exists:supplier_groups,id',
+            'group_ids' => 'nullable|array',
+            'group_ids.*' => 'exists:supplier_groups,id',
             'name' => 'required|string|max:255',
             'country' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
@@ -151,6 +152,11 @@ class SupplierController extends Controller
 
         $supplier = Supplier::create($data);
 
+        // Grup atamalarını yap
+        if ($request->has('group_ids') && is_array($request->group_ids)) {
+            $supplier->groups()->attach($request->group_ids);
+        }
+
         return redirect()->route('admin.suppliers.show', $supplier)
             ->with('success', 'Tedarikçi başarıyla eklendi.');
     }
@@ -163,7 +169,7 @@ class SupplierController extends Controller
             abort(404, 'Tedarikçi bulunamadı.');
         }
         
-        $supplier->load(['hotels', 'group']);
+        $supplier->load(['hotels', 'groups']);
         return view('admin.suppliers.show', compact('supplier'));
     }
 
@@ -177,6 +183,7 @@ class SupplierController extends Controller
         }
         
         $groups = SupplierGroup::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        $supplier->load('groups');
         return view('admin.suppliers.edit', compact('supplier', 'groups'));
     }
 
@@ -190,7 +197,8 @@ class SupplierController extends Controller
         }
         
         $request->validate([
-            'group_id' => 'nullable|exists:supplier_groups,id',
+            'group_ids' => 'nullable|array',
+            'group_ids.*' => 'exists:supplier_groups,id',
             'name' => 'required|string|max:255',
             'country' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
@@ -315,6 +323,11 @@ class SupplierController extends Controller
         $data['api_credentials'] = !empty($apiCredentials) ? $apiCredentials : null;
 
         $supplier->update($data);
+
+        // Grup atamalarını güncelle
+        if ($request->has('group_ids')) {
+            $supplier->groups()->sync($request->group_ids ?? []);
+        }
 
         return redirect()->route('admin.suppliers.show', $supplier)
             ->with('success', 'Tedarikçi başarıyla güncellendi.');

@@ -42,12 +42,17 @@
                             </tr>
                             @if(auth()->user()->isAdmin())
                                 <tr>
-                                    <th>Grup:</th>
+                                    <th>Gruplar:</th>
                                     <td>
-                                        @if($supplier->group)
-                                            <span class="badge" style="background-color: {{ $supplier->group->color }}; color: white;">
-                                                {{ $supplier->group->name }}
-                                            </span>
+                                        @if($supplier->groups->count() > 0)
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach($supplier->groups as $group)
+                                                    <span class="badge" style="background-color: {{ $group->color }}; color: white;" 
+                                                          title="{{ $group->group_type_label }}">
+                                                        {{ $group->name }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
                                         @else
                                             <span class="text-muted">Grup atanmamış</span>
                                         @endif

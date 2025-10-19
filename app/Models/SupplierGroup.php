@@ -12,7 +12,8 @@ class SupplierGroup extends Model
         'description',
         'color',
         'is_active',
-        'sort_order'
+        'sort_order',
+        'group_type'
     ];
 
     protected $casts = [
@@ -21,11 +22,11 @@ class SupplierGroup extends Model
     ];
 
     /**
-     * Bu gruba ait tedarikçiler
+     * Bu gruba ait tedarikçiler (many-to-many)
      */
     public function suppliers()
     {
-        return $this->hasMany(Supplier::class, 'group_id');
+        return $this->belongsToMany(Supplier::class, 'supplier_group_members');
     }
 
     /**
@@ -33,7 +34,8 @@ class SupplierGroup extends Model
      */
     public function activeSuppliers()
     {
-        return $this->hasMany(Supplier::class, 'group_id')->where('is_active', true);
+        return $this->belongsToMany(Supplier::class, 'supplier_group_members')
+                    ->where('is_active', true);
     }
 
     /**
@@ -50,5 +52,42 @@ class SupplierGroup extends Model
     public function getBadgeAttribute()
     {
         return '<span class="badge" style="background-color: ' . $this->color . '">' . $this->name . '</span>';
+    }
+
+    /**
+     * Grup tipi kontrol metodları
+     */
+    public function isReportGroup(): bool
+    {
+        return $this->group_type === 'report';
+    }
+
+    public function isProfitGroup(): bool
+    {
+        return $this->group_type === 'profit';
+    }
+
+    public function isXmlGroup(): bool
+    {
+        return $this->group_type === 'xml';
+    }
+
+    public function isManualGroup(): bool
+    {
+        return $this->group_type === 'manual';
+    }
+
+    /**
+     * Grup tipi etiketleri
+     */
+    public function getGroupTypeLabelAttribute(): string
+    {
+        return match($this->group_type) {
+            'report' => 'Rapor Grubu',
+            'profit' => 'Kar Grubu',
+            'xml' => 'XML Tedarikçi',
+            'manual' => 'Manuel Tedarikçi',
+            default => 'Bilinmiyor'
+        };
     }
 }

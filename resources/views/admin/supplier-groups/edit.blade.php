@@ -58,6 +58,26 @@
                 
                 <div class="col-md-3">
                     <div class="mb-3">
+                        <label for="group_type" class="form-label">Grup Tipi *</label>
+                        <select class="form-select @error('group_type') is-invalid @enderror" 
+                                id="group_type" name="group_type" required>
+                            <option value="">Grup Tipi Seçin</option>
+                            <option value="report" {{ old('group_type', $supplierGroup->group_type) == 'report' ? 'selected' : '' }}>Rapor Grubu</option>
+                            <option value="profit" {{ old('group_type', $supplierGroup->group_type) == 'profit' ? 'selected' : '' }}>Kar Grubu</option>
+                            <option value="xml" {{ old('group_type', $supplierGroup->group_type) == 'xml' ? 'selected' : '' }}>XML Tedarikçi</option>
+                            <option value="manual" {{ old('group_type', $supplierGroup->group_type) == 'manual' ? 'selected' : '' }}>Manuel Tedarikçi</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            Rapor: Çoklu atama | Kar: Tek atama | XML/Manuel: Tedarikçi tipi
+                        </small>
+                        @error('group_type')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="mb-3">
                         <label for="sort_order" class="form-label">Sıra</label>
                         <input type="number" class="form-control @error('sort_order') is-invalid @enderror" 
                                id="sort_order" name="sort_order" value="{{ old('sort_order', $supplierGroup->sort_order) }}" min="0">

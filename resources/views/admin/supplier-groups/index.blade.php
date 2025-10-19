@@ -31,6 +31,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Grup Adı</th>
+                            <th>Grup Tipi</th>
                             <th>Açıklama</th>
                             <th>Renk</th>
                             <th>Tedarikçi Sayısı</th>
@@ -45,6 +46,9 @@
                             <td>{{ $group->id }}</td>
                             <td>
                                 <strong>{{ $group->name }}</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ $group->group_type_label }}</span>
                             </td>
                             <td>
                                 @if($group->description)
