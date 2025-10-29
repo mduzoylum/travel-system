@@ -65,13 +65,62 @@ class CreditController extends Controller
             'firm_id' => 'required|exists:firms,id|unique:credit_accounts,firm_id,' . $creditAccount->id,
             'credit_limit' => 'required|numeric|min:0',
             'currency' => 'required|string|max:3',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'notes' => 'nullable|string|max:2000'
         ]);
 
-        $data = $request->all();
-        $data['is_active'] = $request->has('is_active');
+        $data = $request->only(['firm_id','credit_limit','currency','balance','is_active']);
+        $data['is_active'] = (bool) ($request->input('is_active') === '1' || $request->input('is_active') === 1 || $request->boolean('is_active'));
+
+        // Orijinal değerleri sakla (karşılaştırma için)
+        $original = $creditAccount->getOriginal();
 
         $creditAccount->update($data);
+
+        // Değişiklikleri işlem geçmişine yaz
+        $changes = [];
+        if (isset($original['is_active']) && $original['is_active'] != $creditAccount->is_active) {
+            $changes[] = 'Durum: ' . ($original['is_active'] ? 'Aktif' : 'Pasif') . ' → ' . ($creditAccount->is_active ? 'Aktif' : 'Pasif');
+        }
+        if (isset($original['credit_limit']) && (float)$original['credit_limit'] != (float)$creditAccount->credit_limit) {
+            $changes[] = 'Limit: ' . number_format((float)$original['credit_limit'], 2) . ' → ' . number_format((float)$creditAccount->credit_limit, 2) . ' ' . $creditAccount->currency;
+        }
+        if (isset($original['currency']) && $original['currency'] !== $creditAccount->currency) {
+            $changes[] = 'Para Birimi: ' . ($original['currency'] ?? '-') . ' → ' . $creditAccount->currency;
+        }
+
+        // Bakiye değişimi ayrı bir işlem olarak kaydedilsin
+        if (isset($original['balance']) && (float)$original['balance'] != (float)$creditAccount->balance) {
+            $diff = (float)$creditAccount->balance - (float)$original['balance'];
+            $type = $diff >= 0 ? 'credit' : 'debit';
+            $amount = abs($diff);
+            CreditTransaction::create([
+                'credit_account_id' => $creditAccount->id,
+                'type' => $type,
+                'amount' => $amount,
+                'description' => 'Bakiye düzeltme (düzenleme ekranı)'.($request->filled('notes') ? ' - Not: '.$request->input('notes') : ''),
+                'reference_type' => 'manual',
+                'reference_id' => null,
+                'balance_after' => $creditAccount->balance,
+            ]);
+        }
+
+        if (!empty($changes) || $request->filled('notes')) {
+            $desc = 'Hesap ayar güncellemesi: ' . implode(' | ', $changes);
+            if ($request->filled('notes')) {
+                $desc .= ' - Not: ' . $request->input('notes');
+            }
+            // 0 tutarlı bilgi amaçlı işlem kaydı
+            CreditTransaction::create([
+                'credit_account_id' => $creditAccount->id,
+                'type' => 'credit',
+                'amount' => 0,
+                'description' => $desc,
+                'reference_type' => 'manual',
+                'reference_id' => null,
+                'balance_after' => $creditAccount->balance,
+            ]);
+        }
 
         return redirect()->route('admin.credits.index')
             ->with('success', 'Kredi hesabı başarıyla güncellendi.');

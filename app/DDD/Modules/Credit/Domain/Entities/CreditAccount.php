@@ -40,6 +40,16 @@ class CreditAccount extends Model
         $this->balance += $amount->getAmount();
         $this->save();
 
+        // İşlem geçmişi kaydı
+        $this->transactions()->create([
+            'type' => 'credit',
+            'amount' => $amount->getAmount(),
+            'description' => $description,
+            'reference_type' => 'manual',
+            'reference_id' => null,
+            'balance_after' => $this->balance,
+        ]);
+
         event(new CreditAdded($this, $amount, $description));
     }
 
@@ -51,6 +61,16 @@ class CreditAccount extends Model
 
         $this->balance -= $amount->getAmount();
         $this->save();
+
+        // İşlem geçmişi kaydı
+        $this->transactions()->create([
+            'type' => 'debit',
+            'amount' => $amount->getAmount(),
+            'description' => $description,
+            'reference_type' => 'manual',
+            'reference_id' => null,
+            'balance_after' => $this->balance,
+        ]);
 
         event(new CreditUsed($this, $amount, $description));
     }
