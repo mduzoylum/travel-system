@@ -310,8 +310,10 @@ class SupplierController extends Controller
         if ($request->api_password) {
             $apiCredentials['password'] = $request->api_password;
         } elseif (!$request->api_password && $supplier->api_credentials) {
-            // Şifre değiştirilmemişse mevcut şifreyi koru
-            $existingCredentials = json_decode($supplier->api_credentials, true);
+            // Şifre değiştirilmemişse mevcut şifreyi koru (dizi veya JSON dizesi olabilir)
+            $existingCredentials = is_array($supplier->api_credentials)
+                ? $supplier->api_credentials
+                : (json_decode((string) $supplier->api_credentials, true) ?: []);
             if (isset($existingCredentials['password'])) {
                 $apiCredentials['password'] = $existingCredentials['password'];
             }
