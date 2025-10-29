@@ -34,8 +34,36 @@ class HotelController extends Controller
 
     public function show(Hotel $hotel)
     {
-        $hotel->load(['supplier', 'contracts.firm', 'contracts.rooms']);
-        return view('admin.hotels.show', compact('hotel'));
+        $hotel->load(['supplier']);
+
+        // Kontratlar için filtreler
+        $contractsQuery = $hotel->contracts()->with(['firm', 'rooms']);
+
+        if (request()->filled('status')) {
+            $status = request('status');
+            if ($status === 'active') {
+                $contractsQuery->where('is_active', true);
+            } elseif ($status === 'passive') {
+                $contractsQuery->where('is_active', false);
+            } elseif ($status === 'expired') {
+                $contractsQuery->whereDate('end_date', '<', now());
+            }
+        }
+
+        if (request()->filled('currency')) {
+            $contractsQuery->where('currency', request('currency'));
+        }
+
+        if (request()->filled('start_date')) {
+            $contractsQuery->whereDate('start_date', '>=', request('start_date'));
+        }
+        if (request()->filled('end_date')) {
+            $contractsQuery->whereDate('end_date', '<=', request('end_date'));
+        }
+
+        $contracts = $contractsQuery->orderByDesc('start_date')->paginate(10)->withQueryString();
+
+        return view('admin.hotels.show', compact('hotel', 'contracts'));
     }
 
     public function store(Request $request)

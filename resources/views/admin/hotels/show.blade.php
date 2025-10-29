@@ -72,7 +72,7 @@
                             <tr>
                                 <th>Kontrat Sayısı:</th>
                                 <td>
-                                    <span class="badge bg-primary">{{ $hotel->contracts->count() }} Kontrat</span>
+                                    <span class="badge bg-primary">{{ isset($contracts) ? $contracts->total() : ($hotel->contracts->count() ?? 0) }} Kontrat</span>
                                 </td>
                             </tr>
                         </table>
@@ -81,12 +81,43 @@
             </div>
         </div>
 
-        @if($hotel->contracts->count() > 0)
         <div class="card mt-4">
             <div class="card-header">
                 <h5 class="card-title mb-0">Kontratlar</h5>
             </div>
             <div class="card-body">
+                <form method="GET" class="row g-2 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Durum</label>
+                        <select name="status" class="form-select">
+                            <option value="">Tümü</option>
+                            <option value="active" {{ request('status')=='active' ? 'selected' : '' }}>Aktif</option>
+                            <option value="passive" {{ request('status')=='passive' ? 'selected' : '' }}>Pasif</option>
+                            <option value="expired" {{ request('status')=='expired' ? 'selected' : '' }}>Süresi Dolmuş</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Para Birimi</label>
+                        <select name="currency" class="form-select">
+                            <option value="">Tümü</option>
+                            <option value="TRY" {{ request('currency')=='TRY' ? 'selected' : '' }}>TRY</option>
+                            <option value="USD" {{ request('currency')=='USD' ? 'selected' : '' }}>USD</option>
+                            <option value="EUR" {{ request('currency')=='EUR' ? 'selected' : '' }}>EUR</option>
+                            <option value="GBP" {{ request('currency')=='GBP' ? 'selected' : '' }}>GBP</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Başlangıç ≥</label>
+                        <input type="date" name="start_date" value="{{ request('start_date') }}" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Bitiş ≤</label>
+                        <input type="date" name="end_date" value="{{ request('end_date') }}" class="form-control" />
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button class="btn btn-outline-primary w-100" type="submit">Filtrele</button>
+                    </div>
+                </form>
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
@@ -102,7 +133,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($hotel->contracts as $contract)
+                            @forelse(($contracts ?? collect()) as $contract)
                             <tr>
                                 <td>{{ $contract->id }}</td>
                                 <td>
@@ -138,13 +169,19 @@
                                     </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="8" class="text-center text-muted">Kontrat bulunamadı</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
+                @if(isset($contracts))
+                    <div class="d-flex justify-content-center mt-2">{{ $contracts->links() }}</div>
+                @endif
             </div>
         </div>
-        @endif
     </div>
 
     <div class="col-md-4">
