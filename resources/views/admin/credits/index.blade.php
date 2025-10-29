@@ -48,19 +48,18 @@
                                 <span class="badge bg-secondary">{{ $account->currency }}</span>
                             </td>
                             <td>
-                                @if($account->transactions->count() > 0)
-                                    {{ $account->transactions->first()->created_at->format('d.m.Y H:i') }}
+                                @php $lastTx = $account->transactions->first(); @endphp
+                                @if($lastTx)
+                                    {{ $lastTx->created_at->format('d.m.Y H:i') }}
                                 @else
                                     <span class="text-muted">İşlem yok</span>
                                 @endif
                             </td>
                             <td>
-                                @if($account->balance > 0)
+                                @if($account->is_active)
                                     <span class="badge bg-success">Aktif</span>
-                                @elseif($account->balance < 0)
-                                    <span class="badge bg-danger">Borçlu</span>
                                 @else
-                                    <span class="badge bg-secondary">Boş</span>
+                                    <span class="badge bg-secondary">Pasif</span>
                                 @endif
                             </td>
                             <td>

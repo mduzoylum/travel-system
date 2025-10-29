@@ -13,7 +13,9 @@ class CreditController extends Controller
 {
     public function index()
     {
-        $creditAccounts = CreditAccount::with(['firm'])
+        $creditAccounts = CreditAccount::with(['firm', 'transactions' => function($q) {
+                $q->orderBy('created_at', 'desc')->limit(1);
+            }])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
         return view('admin.credits.index', compact('creditAccounts'));
