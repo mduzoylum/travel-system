@@ -69,6 +69,23 @@ class Money
         return $this->currency === $money->getCurrency() && $this->amount === $money->getAmount();
     }
 
+    /**
+     * Para birimini dönüştür
+     * 
+     * @param string $targetCurrency Hedef para birimi
+     * @param float $exchangeRate Döviz kuru
+     * @return Money
+     */
+    public function convertTo(string $targetCurrency, float $exchangeRate): Money
+    {
+        if ($this->currency === $targetCurrency) {
+            return $this;
+        }
+
+        $convertedAmount = $this->amount * $exchangeRate;
+        return new Money($convertedAmount, strtoupper($targetCurrency));
+    }
+
     public function __toString(): string
     {
         return number_format($this->amount, 2) . ' ' . $this->currency;

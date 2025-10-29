@@ -29,4 +29,39 @@ class ContractRoom extends Model
     {
         return $this->hasMany(RoomAvailability::class);
     }
+
+    public function periods()
+    {
+        return $this->hasMany(ContractRoomPeriod::class);
+    }
+
+    /**
+     * Belirtilen tarih için geçerli periyodu getir
+     */
+    public function getPeriodForDate(\Carbon\Carbon $date): ?ContractRoomPeriod
+    {
+        return $this->periods()
+            ->where('start_date', '<=', $date)
+            ->where('end_date', '>=', $date)
+            ->where('is_active', true)
+            ->first();
+    }
+
+    /**
+     * Belirtilen tarih aralığındaki tüm periyotları getir
+     */
+    public function getPeriodsForDateRange(\Carbon\Carbon $startDate, \Carbon\Carbon $endDate)
+    {
+        return $this->periods()
+            ->where('is_active', true)
+            ->where(function($query) use ($startDate, $endDate) {
+                $query->whereBetween('start_date', [$startDate, $endDate])
+                      ->orWhereBetween('end_date', [$startDate, $endDate])
+                      ->orWhere(function($q) use ($startDate, $endDate) {
+                          $q->where('start_date', '<=', $startDate)
+                            ->where('end_date', '>=', $endDate);
+                      });
+            })
+            ->get();
+    }
 }

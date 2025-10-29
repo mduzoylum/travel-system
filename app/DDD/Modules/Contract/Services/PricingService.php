@@ -55,7 +55,7 @@ class PricingService
      */
     public function getServiceFeeForUser(User $user): float
     {
-        $firmUser = $user->firmUsers()->first();
+        $firmUser = $user->firmUser;
         
         if (!$firmUser) {
             return 0;
@@ -78,7 +78,7 @@ class PricingService
      */
     public function getServiceFeeSource(User $user): string
     {
-        $firmUser = $user->firmUsers()->first();
+        $firmUser = $user->firmUser;
         
         if (!$firmUser) {
             return 'Kullanıcı firmaya bağlı değil';
@@ -169,6 +169,108 @@ class PricingService
                 'total_per_night' => $pricePerNight['total_price'],
                 'nights' => $nights,
                 'service_fee_source' => $pricePerNight['breakdown']['service_fee_source']
+            ]
+        ];
+    }
+
+    /**
+     * Çoklu periyot fiyat hesaplama (farklı para birimleri destekli)
+     * 
+     * @param ContractRoom $room
+     * @param User $user
+     * @param string $checkinDate
+     * @param string $checkoutDate
+     * @param string $targetCurrency Hedef para birimi (ör: TRY)
+     * @param int $guestCount
+     * @return array
+     */
+    public function calculateMultiPeriodPrice(
+        ContractRoom $room, 
+        User $user, 
+        string $checkinDate, 
+        string $checkoutDate, 
+        string $targetCurrency = 'TRY',
+        int $guestCount = 1
+    ): array {
+        $checkin = \Carbon\Carbon::parse($checkinDate);
+        $checkout = \Carbon\Carbon::parse($checkoutDate);
+        
+        // Periyotları al
+        $periods = $room->getPeriodsForDateRange($checkin, $checkout);
+        
+        if ($periods->isEmpty()) {
+            // Periyot yoksa eski metodu kullan
+            return $this->calculateReservationPrice($room, $user, $checkinDate, $checkoutDate, $guestCount);
+        }
+
+        $exchangeService = new CurrencyExchangeService();
+        $nightlyPrices = [];
+        $totalBasePrice = 0;
+        $totalSalePrice = 0;
+
+        // Her gün için fiyat hesapla
+        $currentDate = $checkin->copy();
+        while ($currentDate->lt($checkout)) {
+            $period = $room->getPeriodForDate($currentDate);
+            
+            if ($period) {
+                $basePrice = $period->base_price * $guestCount;
+                $salePrice = $period->sale_price * $guestCount;
+
+                // Para birimi farklıysa dönüştür
+                if ($period->currency !== $targetCurrency) {
+                    $basePrice = $exchangeService->convert(
+                        $basePrice, 
+                        $period->currency, 
+                        $targetCurrency, 
+                        $currentDate
+                    );
+                    $salePrice = $exchangeService->convert(
+                        $salePrice, 
+                        $period->currency, 
+                        $targetCurrency, 
+                        $currentDate
+                    );
+                }
+
+                $totalBasePrice += $basePrice;
+                $totalSalePrice += $salePrice;
+
+                $nightlyPrices[] = [
+                    'date' => $currentDate->format('Y-m-d'),
+                    'base_price' => $basePrice,
+                    'sale_price' => $salePrice,
+                    'currency' => $targetCurrency,
+                    'period_currency' => $period->currency
+                ];
+            } else {
+                // Periyot bulunamadı - varsayılan fiyat kullan
+                $defaultPrice = $this->calculatePriceForUser($room, $user, $guestCount);
+                $totalBasePrice += $defaultPrice['base_price'];
+                $totalSalePrice += $defaultPrice['total_price'];
+            }
+
+            $currentDate->addDay();
+        }
+
+        $serviceFee = $this->getServiceFeeForUser($user);
+        $nights = count($nightlyPrices);
+        $totalServiceFee = $serviceFee * $nights;
+        
+        return [
+            'nights' => $nights,
+            'base_price' => $totalBasePrice,
+            'sale_price' => $totalSalePrice,
+            'service_fee' => $serviceFee,
+            'total_service_fee' => $totalServiceFee,
+            'grand_total' => $totalSalePrice + $totalServiceFee,
+            'currency' => $targetCurrency,
+            'nightly_breakdown' => $nightlyPrices,
+            'breakdown' => [
+                'price_per_night' => $nights > 0 ? $totalSalePrice / $nights : 0,
+                'service_fee_per_night' => $serviceFee,
+                'nights' => $nights,
+                'service_fee_source' => $this->getServiceFeeSource($user)
             ]
         ];
     }

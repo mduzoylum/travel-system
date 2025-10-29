@@ -91,8 +91,19 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-info" 
+                                            onclick="calculatePrice({{ $room->id }})" 
+                                            title="Fiyat Hesapla">
+                                        <i class="fas fa-calculator"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-secondary" 
+                                            onclick="viewPeriods({{ $room->id }})" 
+                                            title="Periyotları Görüntüle">
+                                        <i class="fas fa-calendar"></i>
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-warning" 
-                                            onclick="editRoom({{ $room->id }})">
+                                            onclick="editRoom({{ $room->id }})"
+                                            title="Düzenle">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <form action="{{ route('admin.contracts.rooms.destroy', [$contract, $room]) }}" 
@@ -100,7 +111,7 @@
                                           onsubmit="return confirm('Bu odayı silmek istediğinizden emin misiniz?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Sil">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -275,6 +286,14 @@ document.addEventListener('DOMContentLoaded', function() {
 function editRoom(roomId) {
     // TODO: Oda düzenleme modal'ı eklenecek
     alert('Oda düzenleme özelliği yakında eklenecek.');
+}
+
+function calculatePrice(roomId) {
+    window.location.href = `/admin/test-pricing?room_id=${roomId}`;
+}
+
+function viewPeriods(roomId) {
+    window.open(`/admin/contracts/rooms/${roomId}/periods`, '_blank');
 }
 </script>
 @endpush 

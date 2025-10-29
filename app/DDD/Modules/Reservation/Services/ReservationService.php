@@ -22,8 +22,14 @@ class ReservationService
         $this->contractSelectionService = app(ContractSelectionService::class);
         $this->pricingService = app(PricingService::class);
     }
-    public function makeReservation(User $user, ContractRoom $room, string $checkinDate, string $checkoutDate, int $guestCount = 1): Reservation
-    {
+    public function makeReservation(
+        User $user, 
+        ContractRoom $room, 
+        string $checkinDate, 
+        string $checkoutDate, 
+        int $guestCount = 1,
+        string $targetCurrency = 'TRY'
+    ): Reservation {
         // 1. Kural: kullanıcı bu odaya erişebiliyor mu?
         $canAccess = app(AccessRuleEvaluatorService::class)->canUserAccessHotel($user, $room->contract->hotel);
 
@@ -43,8 +49,16 @@ class ReservationService
         // 3. Kural: kredi kontrolü yapılmalı (henüz implement edilmedi)
 
         // 4. Toplam fiyat hesapla (servis bedeli dahil)
-        $priceCalculation = $this->pricingService->calculatePriceForUser($room, $user, $guestCount);
-        $total = $priceCalculation['total_price'];
+        // Önce çoklu periyot hesaplamayı dene
+        $priceCalculation = $this->pricingService->calculateMultiPeriodPrice(
+            $room, 
+            $user, 
+            $checkinDate, 
+            $checkoutDate, 
+            $targetCurrency, 
+            $guestCount
+        );
+        $total = $priceCalculation['grand_total'];
 
         // 5. Rezervasyon oluştur
         $reservation = Reservation::create([

@@ -131,4 +131,56 @@ Route::get('/dummy', function () {
     ]);
 });
 
+// Test route for multi-period pricing
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('test-pricing', function () {
+        $selectedRoom = null;
+        if (request('room_id')) {
+            $selectedRoom = \App\DDD\Modules\Contract\Models\ContractRoom::with('periods', 'contract.hotel')->find(request('room_id'));
+        }
+        return view('admin.test-pricing', compact('selectedRoom'));
+    })->name('test.pricing');
+    
+    Route::post('test-pricing/calculate', function (\Illuminate\Http\Request $request) {
+        \Log::info('Test pricing request', $request->all());
+        
+        $room = \App\DDD\Modules\Contract\Models\ContractRoom::with('periods')->find($request->room_id);
+        $user = auth()->user();
+        
+        if (!$room) {
+            return back()->withErrors(['message' => 'Oda bulunamadı']);
+        }
+        
+        $pricingService = new \App\DDD\Modules\Contract\Services\PricingService();
+        
+        try {
+            \Log::info('Calculating price', [
+                'room_id' => $room->id,
+                'checkin' => $request->checkin_date,
+                'checkout' => $request->checkout_date,
+                'currency' => $request->currency,
+            ]);
+            
+            $result = $pricingService->calculateMultiPeriodPrice(
+                $room,
+                $user,
+                $request->checkin_date,
+                $request->checkout_date,
+                $request->currency ?? 'TRY',
+                $request->guest_count ?? 1
+            );
+            
+            \Log::info('Calculation result', ['nights' => $result['nights'], 'total' => $result['grand_total']]);
+            
+            return view('admin.test-pricing', compact('room', 'result'));
+        } catch (\Exception $e) {
+            \Log::error('Pricing calculation error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['message' => $e->getMessage()])->withInput();
+        }
+    })->name('test.pricing.calculate');
+});
+
 
