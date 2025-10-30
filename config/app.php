@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Europe/Istanbul', // Turkey timezone (UTC+3)
 
     /*
     |--------------------------------------------------------------------------
