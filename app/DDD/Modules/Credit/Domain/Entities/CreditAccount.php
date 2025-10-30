@@ -16,7 +16,8 @@ class CreditAccount extends Model
         'balance',
         'credit_limit',
         'currency',
-        'is_active'
+        'is_active',
+        'notes'
     ];
 
     protected $casts = [

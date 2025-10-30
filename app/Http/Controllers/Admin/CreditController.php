@@ -71,7 +71,7 @@ class CreditController extends Controller
             'notes' => 'nullable|string|max:2000'
         ]);
 
-        $data = $request->only(['firm_id','credit_limit','currency','balance','is_active']);
+        $data = $request->only(['firm_id','credit_limit','currency','balance','is_active','notes']);
         $data['is_active'] = (bool) ($request->input('is_active') === '1' || $request->input('is_active') === 1 || $request->boolean('is_active'));
 
         // Orijinal değerleri sakla (karşılaştırma için)
@@ -100,18 +100,15 @@ class CreditController extends Controller
                 'credit_account_id' => $creditAccount->id,
                 'type' => $type,
                 'amount' => $amount,
-                'description' => 'Bakiye düzeltme (düzenleme ekranı)'.($request->filled('notes') ? ' - Not: '.$request->input('notes') : ''),
+                'description' => 'Bakiye düzeltme (düzenleme ekranı)',
                 'reference_type' => 'manual',
                 'reference_id' => null,
                 'balance_after' => $creditAccount->balance,
             ]);
         }
 
-        if (!empty($changes) || $request->filled('notes')) {
+        if (!empty($changes)) {
             $desc = 'Hesap ayar güncellemesi: ' . implode(' | ', $changes);
-            if ($request->filled('notes')) {
-                $desc .= ' - Not: ' . $request->input('notes');
-            }
             // 0 tutarlı bilgi amaçlı işlem kaydı
             CreditTransaction::create([
                 'credit_account_id' => $creditAccount->id,

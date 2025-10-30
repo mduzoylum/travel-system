@@ -87,11 +87,13 @@
                     </div>
                 </div>
 
-                @if($creditAccount->description)
+                @if($creditAccount->notes)
                 <div class="row">
                     <div class="col-12">
-                        <h6>Açıklama:</h6>
-                        <p class="text-muted">{{ $creditAccount->description }}</p>
+                        <h6>Notlar:</h6>
+                        <div class="border rounded p-3 bg-light">
+                            {!! nl2br(e($creditAccount->notes)) !!}
+                        </div>
                     </div>
                 </div>
                 @endif
