@@ -11,27 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Önce nullable olarak ekle (unique constraint olmadan)
-        Schema::table('hotels', function (Blueprint $table) {
-            $table->string('unique_id', 10)->nullable()->after('id');
-        });
-        
-        // Mevcut kayıtlara benzersiz ID atamalarını yap
-        $hotels = \DB::table('hotels')->whereNull('unique_id')->orWhere('unique_id', '')->get();
-        
-        foreach ($hotels as $hotel) {
-            do {
-                $length = rand(8, 9);
-                $uniqueId = str_pad((string) rand(0, 999999999), $length, '0', STR_PAD_LEFT);
-            } while (\DB::table('hotels')->where('unique_id', $uniqueId)->exists());
-            
-            \DB::table('hotels')->where('id', $hotel->id)->update(['unique_id' => $uniqueId]);
+        // Kolon zaten canlıda eklenmiş durumda
+        // Sadece column ekleme işlemi yapılacak (ilerideki migration constraint'i halleder)
+        if (!Schema::hasColumn('hotels', 'unique_id')) {
+            Schema::table('hotels', function (Blueprint $table) {
+                $table->string('unique_id', 10)->nullable()->after('id');
+            });
         }
-        
-        // Şimdi unique constraint ekle
-        Schema::table('hotels', function (Blueprint $table) {
-            $table->string('unique_id')->unique()->change();
-        });
     }
 
     /**
