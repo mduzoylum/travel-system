@@ -9,7 +9,8 @@ class Hotel extends Model
     protected $fillable = [
         'name', 'city', 'country', 'address', 'stars', 'min_price', 'is_contracted', 
         'description', 'supplier_id', 'accounting_code', 'external_id', 'image', 'is_active',
-        'unique_id', 'country_id', 'city_id', 'sub_destination_id'
+        'unique_id', 'country_id', 'city_id', 'sub_destination_id',
+        'latitude', 'longitude'
     ];
 
     protected static function boot()

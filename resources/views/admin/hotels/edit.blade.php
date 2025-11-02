@@ -108,6 +108,28 @@
                                     @enderror
                                 </div>
 
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="latitude" class="form-label">Enlem (Latitude)</label>
+                                        <input type="number" step="any" class="form-control @error('latitude') is-invalid @enderror" 
+                                               id="latitude" name="latitude" value="{{ old('latitude', $hotel->latitude) }}" placeholder="41.0082">
+                                        @error('latitude')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <div class="form-text">Örn: 41.0082 (İstanbul merkez)</div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="longitude" class="form-label">Boylam (Longitude)</label>
+                                        <input type="number" step="any" class="form-control @error('longitude') is-invalid @enderror" 
+                                               id="longitude" name="longitude" value="{{ old('longitude', $hotel->longitude) }}" placeholder="28.9784">
+                                        @error('longitude')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <div class="form-text">Örn: 28.9784 (İstanbul merkez)</div>
+                                    </div>
+                                </div>
+
                                 <div class="mb-3">
                                     <label for="min_price" class="form-label">Minimum Fiyat (₺) *</label>
                                     <input type="number" step="0.01" min="0" class="form-control @error('min_price') is-invalid @enderror" 
