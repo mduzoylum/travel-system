@@ -9,7 +9,7 @@ class Hotel extends Model
     protected $fillable = [
         'name', 'city', 'country', 'address', 'stars', 'min_price', 'is_contracted', 
         'description', 'supplier_id', 'accounting_code', 'external_id', 'image', 'is_active',
-        'unique_id'
+        'unique_id', 'country_id', 'city_id', 'sub_destination_id'
     ];
 
     protected static function boot()
@@ -45,6 +45,21 @@ class Hotel extends Model
     public function supplier()
     {
         return $this->belongsTo(\App\DDD\Modules\Supplier\Domain\Entities\Supplier::class);
+    }
+
+    public function destinationCountry()
+    {
+        return $this->belongsTo(Destination::class, 'country_id');
+    }
+
+    public function destinationCity()
+    {
+        return $this->belongsTo(Destination::class, 'city_id');
+    }
+
+    public function destinationSub()
+    {
+        return $this->belongsTo(Destination::class, 'sub_destination_id');
     }
 
 }

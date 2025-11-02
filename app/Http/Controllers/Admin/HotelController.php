@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\DDD\Modules\Contract\Models\Hotel;
+use App\DDD\Modules\Contract\Models\Destination;
 use App\DDD\Modules\Supplier\Domain\Entities\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -29,7 +30,11 @@ class HotelController extends Controller
             ->whereNull('api_credentials')
             ->whereNull('deleted_at')
             ->get();
-        return view('admin.hotels.create', compact('suppliers'));
+        
+        // Destinasyonlar için ülkeler
+        $countries = Destination::countries();
+        
+        return view('admin.hotels.create', compact('suppliers', 'countries'));
     }
 
     public function show(Hotel $hotel)
