@@ -26,7 +26,7 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Otel ID</th>
                             <th>Resim</th>
                             <th>Ad</th>
                             <th>Şehir</th>
@@ -42,7 +42,7 @@
                     <tbody>
                         @foreach($hotels as $hotel)
                         <tr>
-                            <td>{{ $hotel->id }}</td>
+                            <td><strong>{{ $hotel->unique_id }}</strong></td>
                             <td>
                                 @if($hotel->image)
                                     @if(str_starts_with($hotel->image, 'http'))

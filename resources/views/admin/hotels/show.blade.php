@@ -24,6 +24,10 @@
                     <div class="col-md-6">
                         <table class="table table-borderless">
                             <tr>
+                                <th width="150">Otel ID:</th>
+                                <td><strong>{{ $hotel->unique_id }}</strong></td>
+                            </tr>
+                            <tr>
                                 <th width="150">Otel Adı:</th>
                                 <td>{{ $hotel->name }}</td>
                             </tr>

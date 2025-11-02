@@ -8,8 +8,34 @@ class Hotel extends Model
 {
     protected $fillable = [
         'name', 'city', 'country', 'address', 'stars', 'min_price', 'is_contracted', 
-        'description', 'supplier_id', 'accounting_code', 'external_id', 'image', 'is_active'
+        'description', 'supplier_id', 'accounting_code', 'external_id', 'image', 'is_active',
+        'unique_id'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($hotel) {
+            if (!$hotel->unique_id) {
+                $hotel->unique_id = static::generateUniqueId();
+            }
+        });
+    }
+
+    /**
+     * 8-9 haneli benzersiz ID üret
+     */
+    protected static function generateUniqueId(): string
+    {
+        do {
+            // 8 veya 9 haneli rastgele sayı üret
+            $length = rand(8, 9);
+            $uniqueId = str_pad((string) rand(0, 999999999), $length, '0', STR_PAD_LEFT);
+        } while (static::where('unique_id', $uniqueId)->exists());
+        
+        return $uniqueId;
+    }
 
     public function contracts()
     {
