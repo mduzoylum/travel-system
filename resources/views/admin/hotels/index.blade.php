@@ -93,13 +93,15 @@
                                     <a href="{{ route('admin.hotels.edit', $hotel) }}" class="btn btn-sm btn-warning">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('admin.hotels.destroy', $hotel) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu oteli silmek istediğinizden emin misiniz?')">
+                                    @if(auth()->user()->isAdmin())
+                                    <form action="{{ route('admin.hotels.destroy', $hotel) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu oteli silmek istediğinizden emin misiniz? Admin harici kullanıcılar otel silemez.')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

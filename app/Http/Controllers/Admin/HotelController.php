@@ -191,6 +191,11 @@ class HotelController extends Controller
 
     public function destroy(Hotel $hotel)
     {
+        // Sadece admin kullanıcılar otel silebilir
+        if (!auth()->user()->isAdmin()) {
+            return back()->with('error', 'Bu işlem için yetkiniz yok! Otelleri sadece admin kullanıcılar silebilir.');
+        }
+
         if ($hotel->image) {
             Storage::disk('public')->delete($hotel->image);
         }

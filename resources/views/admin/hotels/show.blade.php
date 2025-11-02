@@ -217,6 +217,7 @@
                 <a href="{{ route('admin.contracts.create') }}?hotel_id={{ $hotel->id }}" class="btn btn-success btn-sm w-100 mb-2">
                     <i class="fas fa-plus"></i> Bu Otel İçin Kontrat Ekle
                 </a>
+                @if(auth()->user()->isAdmin())
                 <form action="{{ route('admin.hotels.destroy', $hotel) }}" method="POST" onsubmit="return confirm('Bu oteli silmek istediğinizden emin misiniz?')">
                     @csrf
                     @method('DELETE')
@@ -224,6 +225,7 @@
                         <i class="fas fa-trash"></i> Oteli Sil
                     </button>
                 </form>
+                @endif
             </div>
         </div>
     </div>
