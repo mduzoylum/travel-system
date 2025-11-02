@@ -36,7 +36,7 @@ class CreditAccount extends Model
         return $this->hasMany(\App\DDD\Modules\Credit\Domain\Entities\CreditTransaction::class);
     }
 
-    public function addCredit(Money $amount, string $description = null): void
+    public function addCredit(Money $amount, string $description = null, ?int $performedBy = null): void
     {
         $this->balance += $amount->getAmount();
         $this->save();
@@ -49,12 +49,13 @@ class CreditAccount extends Model
             'reference_type' => 'manual',
             'reference_id' => null,
             'balance_after' => $this->balance,
+            'performed_by' => $performedBy,
         ]);
 
         event(new CreditAdded($this, $amount, $description));
     }
 
-    public function useCredit(Money $amount, string $description = null): void
+    public function useCredit(Money $amount, string $description = null, ?int $performedBy = null): void
     {
         if (!$this->hasSufficientCredit($amount)) {
             throw new InsufficientCreditException("Yetersiz kredi bakiyesi");
@@ -71,6 +72,7 @@ class CreditAccount extends Model
             'reference_type' => 'manual',
             'reference_id' => null,
             'balance_after' => $this->balance,
+            'performed_by' => $performedBy,
         ]);
 
         event(new CreditUsed($this, $amount, $description));

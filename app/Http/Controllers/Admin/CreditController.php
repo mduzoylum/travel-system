@@ -21,6 +21,15 @@ class CreditController extends Controller
         return view('admin.credits.index', compact('creditAccounts'));
     }
 
+    public function show(CreditAccount $creditAccount)
+    {
+        $creditAccount->load(['firm', 'transactions.performer' => function($query) {
+            $query->orderBy('created_at', 'desc')->limit(50);
+        }]);
+        
+        return view('admin.credits.show', compact('creditAccount'));
+    }
+
     public function create()
     {
         $firms = Firm::where('is_active', true)->get();
@@ -40,19 +49,22 @@ class CreditController extends Controller
         $data['is_active'] = $request->has('is_active');
         $data['balance'] = 0; // Başlangıç bakiyesi 0
 
-        CreditAccount::create($data);
+        $creditAccount = CreditAccount::create($data);
+
+        // Açılış işlemini kaydet
+        CreditTransaction::create([
+            'credit_account_id' => $creditAccount->id,
+            'type' => 'credit',
+            'amount' => 0,
+            'description' => 'Kredi hesabı oluşturuldu - Limit: ' . number_format($data['credit_limit'], 2) . ' ' . $data['currency'],
+            'reference_type' => 'manual',
+            'reference_id' => null,
+            'balance_after' => 0,
+            'performed_by' => auth()->id(),
+        ]);
 
         return redirect()->route('admin.credits.index')
             ->with('success', 'Kredi hesabı başarıyla oluşturuldu.');
-    }
-
-    public function show(CreditAccount $creditAccount)
-    {
-        $creditAccount->load(['firm', 'transactions' => function($query) {
-            $query->orderBy('created_at', 'desc')->limit(50);
-        }]);
-        
-        return view('admin.credits.show', compact('creditAccount'));
     }
 
     public function edit(CreditAccount $creditAccount)
@@ -104,6 +116,7 @@ class CreditController extends Controller
                 'reference_type' => 'manual',
                 'reference_id' => null,
                 'balance_after' => $creditAccount->balance,
+                'performed_by' => auth()->id(),
             ]);
         }
 
@@ -118,6 +131,7 @@ class CreditController extends Controller
                 'reference_type' => 'manual',
                 'reference_id' => null,
                 'balance_after' => $creditAccount->balance,
+                'performed_by' => auth()->id(),
             ]);
         }
 
@@ -134,7 +148,7 @@ class CreditController extends Controller
 
         try {
             $money = new Money($request->amount, $creditAccount->currency);
-            $creditAccount->addCredit($money, $request->description);
+            $creditAccount->addCredit($money, $request->description, auth()->id());
 
             return redirect()->route('admin.credits.show', $creditAccount)
                 ->with('success', 'Kredi başarıyla eklendi.');
@@ -152,7 +166,7 @@ class CreditController extends Controller
 
         try {
             $money = new Money($request->amount, $creditAccount->currency);
-            $creditAccount->useCredit($money, $request->description);
+            $creditAccount->useCredit($money, $request->description, auth()->id());
 
             return redirect()->route('admin.credits.show', $creditAccount)
                 ->with('success', 'Kredi başarıyla kullanıldı.');
@@ -164,6 +178,7 @@ class CreditController extends Controller
     public function transactions(CreditAccount $creditAccount)
     {
         $transactions = $creditAccount->transactions()
+            ->with('performer')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
             

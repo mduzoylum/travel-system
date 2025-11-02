@@ -98,28 +98,24 @@
                                         <small>{{ $transaction->created_at->format('d.m.Y H:i') }}</small>
                                     </td>
                                     <td>
-                                        @if($transaction->type === 'credit_added')
+                                        @if($transaction->type === 'credit')
                                             <span class="badge bg-success">
-                                                <i class="fas fa-plus"></i> Ekleme
+                                                <i class="fas fa-plus"></i> Kredi Eklendi
                                             </span>
-                                        @elseif($transaction->type === 'credit_used')
+                                        @elseif($transaction->type === 'debit')
                                             <span class="badge bg-warning">
-                                                <i class="fas fa-minus"></i> Kullanım
+                                                <i class="fas fa-minus"></i> Kredi Kullanıldı
                                             </span>
                                         @else
                                             <span class="badge bg-info">{{ $transaction->type }}</span>
                                         @endif
                                     </td>
                                     <td>
-                                        @if($transaction->description)
-                                            {{ $transaction->description }}
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
+                                        {{ $transaction->description ?? '-' }}
                                     </td>
                                     <td>
-                                        <span class="text-{{ $transaction->type === 'credit_added' ? 'success' : 'danger' }}">
-                                            {{ $transaction->type === 'credit_added' ? '+' : '-' }}
+                                        <span class="text-{{ $transaction->type === 'credit' ? 'success' : 'danger' }}">
+                                            {{ $transaction->type === 'credit' ? '+' : '-' }}
                                             {{ number_format($transaction->amount, 2) }} {{ $creditAccount->currency }}
                                         </span>
                                     </td>
@@ -127,8 +123,10 @@
                                         <strong>{{ number_format($transaction->balance_after, 2) }} {{ $creditAccount->currency }}</strong>
                                     </td>
                                     <td>
-                                        @if($transaction->processed_by)
-                                            <small>{{ $transaction->processed_by }}</small>
+                                        @if($transaction->performer)
+                                            <small>{{ $transaction->performer->name }}</small>
+                                            <br>
+                                            <small class="text-muted">{{ $transaction->performer->email }}</small>
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif

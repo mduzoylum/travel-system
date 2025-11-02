@@ -14,7 +14,8 @@ class CreditTransaction extends Model
         'description',
         'reference_type', // 'reservation', 'manual', 'payment'
         'reference_id',
-        'balance_after'
+        'balance_after',
+        'performed_by'
     ];
 
     protected $casts = [
@@ -25,6 +26,11 @@ class CreditTransaction extends Model
     public function creditAccount()
     {
         return $this->belongsTo(CreditAccount::class);
+    }
+
+    public function performer()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'performed_by');
     }
 
     public function getAmount(): Money
