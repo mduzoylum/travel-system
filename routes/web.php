@@ -21,6 +21,8 @@ Route::get('/approval/{token}/reject', [PublicApprovalController::class, 'reject
 // Public API endpoints (no middleware)
 Route::get('/api/hotels/by-destination', [HotelController::class, 'getHotelsByDestination'])->name('api.hotels.by-destination')->withoutMiddleware(['auth', 'admin']);
 Route::get('/api/contracts/by-hotel/{hotelId}', [ContractController::class, 'getContractsByHotel'])->name('api.contracts.by-hotel')->withoutMiddleware(['auth', 'admin']);
+Route::get('/api/destinations/cities', [HotelController::class, 'getCities'])->name('api.destinations.cities')->withoutMiddleware(['auth', 'admin']);
+Route::get('/api/destinations/sub-destinations', [HotelController::class, 'getSubDestinations'])->name('api.destinations.sub-destinations')->withoutMiddleware(['auth', 'admin']);
 
 Route::get('/', function () {
     return redirect()->route('admin.dashboard');

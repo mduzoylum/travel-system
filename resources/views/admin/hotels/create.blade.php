@@ -59,20 +59,40 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="city" class="form-label">Şehir *</label>
-                                        <input type="text" class="form-control @error('city') is-invalid @enderror" 
-                                               id="city" name="city" value="{{ old('city') }}" required>
-                                        @error('city')
+                                    <div class="col-md-4 mb-3">
+                                        <label for="country_id" class="form-label">Ülke *</label>
+                                        <select class="form-select @error('country_id') is-invalid @enderror" 
+                                                id="country_id" name="country_id" required>
+                                            <option value="">Ülke Seçiniz</option>
+                                            @foreach($countries ?? [] as $country)
+                                                <option value="{{ $country->id }}" {{ old('country_id') == $country->id ? 'selected' : '' }}>
+                                                    {{ $country->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('country_id')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
-                                        <label for="country" class="form-label">Ülke *</label>
-                                        <input type="text" class="form-control @error('country') is-invalid @enderror" 
-                                               id="country" name="country" value="{{ old('country') }}" required>
-                                        @error('country')
+                                    <div class="col-md-4 mb-3">
+                                        <label for="city_id" class="form-label">Şehir *</label>
+                                        <select class="form-select @error('city_id') is-invalid @enderror" 
+                                                id="city_id" name="city_id" required>
+                                            <option value="">Önce ülke seçiniz</option>
+                                        </select>
+                                        @error('city_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
+                                        <label for="sub_destination_id" class="form-label">Alt Destinasyon</label>
+                                        <select class="form-select @error('sub_destination_id') is-invalid @enderror" 
+                                                id="sub_destination_id" name="sub_destination_id">
+                                            <option value="">Önce şehir seçiniz (Opsiyonel)</option>
+                                        </select>
+                                        @error('sub_destination_id')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -168,4 +188,81 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const countrySelect = document.getElementById('country_id');
+    const citySelect = document.getElementById('city_id');
+    const subDestinationSelect = document.getElementById('sub_destination_id');
+    
+    // Ülke değiştiğinde şehirleri yükle
+    countrySelect.addEventListener('change', function() {
+        const countryId = this.value;
+        citySelect.innerHTML = '<option value="">Yükleniyor...</option>';
+        subDestinationSelect.innerHTML = '<option value="">Önce şehir seçiniz (Opsiyonel)</option>';
+        
+        if (countryId) {
+            fetch(`/api/destinations/cities?country_id=${countryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    citySelect.innerHTML = '<option value="">Şehir Seçiniz</option>';
+                    data.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.id;
+                        option.textContent = city.name;
+                        citySelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    citySelect.innerHTML = '<option value="">Hata oluştu</option>';
+                });
+        } else {
+            citySelect.innerHTML = '<option value="">Önce ülke seçiniz</option>';
+        }
+    });
+    
+    // Şehir değiştiğinde alt destinasyonları yükle
+    citySelect.addEventListener('change', function() {
+        const cityId = this.value;
+        subDestinationSelect.innerHTML = '<option value="">Yükleniyor...</option>';
+        
+        if (cityId) {
+            fetch(`/api/destinations/sub-destinations?city_id=${cityId}`)
+                .then(response => response.json())
+                .then(data => {
+                    subDestinationSelect.innerHTML = '<option value="">Alt Destinasyon (Opsiyonel)</option>';
+                    data.forEach(sub => {
+                        const option = document.createElement('option');
+                        option.value = sub.id;
+                        option.textContent = sub.name;
+                        subDestinationSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    subDestinationSelect.innerHTML = '<option value="">Hata oluştu</option>';
+                });
+        } else {
+            subDestinationSelect.innerHTML = '<option value="">Önce şehir seçiniz (Opsiyonel)</option>';
+        }
+    });
+    
+    // Old values için restore
+    @if(old('country_id'))
+        countrySelect.dispatchEvent(new Event('change'));
+        setTimeout(() => {
+            citySelect.value = {{ old('city_id', 'null') }};
+            if (citySelect.value) {
+                citySelect.dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    subDestinationSelect.value = {{ old('sub_destination_id', 'null') }};
+                }, 100);
+            }
+        }, 100);
+    @endif
+});
+</script>
+@endpush
 @endsection 

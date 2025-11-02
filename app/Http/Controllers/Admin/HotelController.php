@@ -75,8 +75,9 @@ class HotelController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'city' => 'required|string|max:100',
-            'country' => 'required|string|max:100',
+            'country_id' => 'required|exists:destinations,id',
+            'city_id' => 'required|exists:destinations,id',
+            'sub_destination_id' => 'nullable|exists:destinations,id',
             'address' => 'required|string|max:500',
             'stars' => 'required|integer|min:1|max:5',
             'min_price' => 'required|numeric|min:0',
@@ -87,8 +88,11 @@ class HotelController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ], [
             'name.required' => 'Otel adı zorunludur.',
-            'city.required' => 'Şehir zorunludur.',
-            'country.required' => 'Ülke zorunludur.',
+            'country_id.required' => 'Ülke seçimi zorunludur.',
+            'country_id.exists' => 'Seçilen ülke bulunamadı.',
+            'city_id.required' => 'Şehir seçimi zorunludur.',
+            'city_id.exists' => 'Seçilen şehir bulunamadı.',
+            'sub_destination_id.exists' => 'Seçilen alt destinasyon bulunamadı.',
             'address.required' => 'Adres zorunludur.',
             'stars.required' => 'Yıldız sayısı seçilmelidir.',
             'stars.integer' => 'Yıldız sayısı geçerli bir sayı olmalıdır.',
@@ -105,6 +109,16 @@ class HotelController extends Controller
 
         $data = $request->except('image');
         $data['is_active'] = $request->has('is_active');
+        
+        // Destinasyon adlarını da kaydet (geriye dönük uyumluluk için)
+        if ($request->country_id) {
+            $country = Destination::find($request->country_id);
+            $data['country'] = $country->name;
+        }
+        if ($request->city_id) {
+            $city = Destination::find($request->city_id);
+            $data['city'] = $city->name;
+        }
 
         // Tedarikçi seçildiyse, tedarikçinin muhasebe kodunu otomatik ata
         if ($request->supplier_id) {
@@ -133,15 +147,20 @@ class HotelController extends Controller
             ->whereNull('api_credentials')
             ->whereNull('deleted_at')
             ->get();
-        return view('admin.hotels.edit', compact('hotel', 'suppliers'));
+        
+        // Destinasyonlar için ülkeler
+        $countries = Destination::countries();
+        
+        return view('admin.hotels.edit', compact('hotel', 'suppliers', 'countries'));
     }
 
     public function update(Request $request, Hotel $hotel)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'city' => 'required|string|max:100',
-            'country' => 'required|string|max:100',
+            'country_id' => 'required|exists:destinations,id',
+            'city_id' => 'required|exists:destinations,id',
+            'sub_destination_id' => 'nullable|exists:destinations,id',
             'address' => 'required|string|max:500',
             'stars' => 'required|integer|min:1|max:5',
             'min_price' => 'required|numeric|min:0',
@@ -152,8 +171,11 @@ class HotelController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ], [
             'name.required' => 'Otel adı zorunludur.',
-            'city.required' => 'Şehir zorunludur.',
-            'country.required' => 'Ülke zorunludur.',
+            'country_id.required' => 'Ülke seçimi zorunludur.',
+            'country_id.exists' => 'Seçilen ülke bulunamadı.',
+            'city_id.required' => 'Şehir seçimi zorunludur.',
+            'city_id.exists' => 'Seçilen şehir bulunamadı.',
+            'sub_destination_id.exists' => 'Seçilen alt destinasyon bulunamadı.',
             'address.required' => 'Adres zorunludur.',
             'stars.required' => 'Yıldız sayısı seçilmelidir.',
             'stars.integer' => 'Yıldız sayısı geçerli bir sayı olmalıdır.',
@@ -170,6 +192,16 @@ class HotelController extends Controller
 
         $data = $request->except('image');
         $data['is_active'] = $request->has('is_active');
+        
+        // Destinasyon adlarını da kaydet (geriye dönük uyumluluk için)
+        if ($request->country_id) {
+            $country = Destination::find($request->country_id);
+            $data['country'] = $country->name;
+        }
+        if ($request->city_id) {
+            $city = Destination::find($request->city_id);
+            $data['city'] = $city->name;
+        }
 
         // Tedarikçi değiştiyse, yeni tedarikçinin muhasebe kodunu ata
         if ($request->supplier_id && $request->supplier_id != $hotel->supplier_id) {
@@ -190,7 +222,7 @@ class HotelController extends Controller
 
         $hotel->update($data);
 
-        return redirect()->route('admin.hotels.index')
+        return redirect()->route('admin.hotels.show', $hotel)
             ->with('success', 'Otel başarıyla güncellendi.');
     }
 
@@ -263,4 +295,30 @@ class HotelController extends Controller
 
         return response()->json($hotels);
     }
-} 
+
+    public function getCities(Request $request)
+    {
+        $countryId = $request->get('country_id');
+        
+        if (!$countryId) {
+            return response()->json([]);
+        }
+
+        $cities = Destination::cities($countryId);
+        
+        return response()->json($cities);
+    }
+
+    public function getSubDestinations(Request $request)
+    {
+        $cityId = $request->get('city_id');
+        
+        if (!$cityId) {
+            return response()->json([]);
+        }
+
+        $subDestinations = Destination::subDestinations($cityId);
+        
+        return response()->json($subDestinations);
+    }
+}
