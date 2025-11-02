@@ -163,7 +163,7 @@ class ContractController extends Controller
             'meal_plan' => 'required|string|max:50',
             'base_price' => 'required|numeric|min:0',
             'sale_price' => 'required|numeric|min:0',
-            'description' => 'nullable|string'
+            'room_description' => 'nullable|string'
         ]);
 
         $contract->rooms()->create($request->all());

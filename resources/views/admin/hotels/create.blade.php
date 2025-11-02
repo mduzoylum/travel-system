@@ -139,12 +139,43 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="description" class="form-label">Açıklama</label>
+                                    <label for="description" class="form-label">Kısa Açıklama</label>
                                     <textarea class="form-control @error('description') is-invalid @enderror" 
-                                              id="description" name="description" rows="4">{{ old('description') }}</textarea>
+                                              id="description" name="description" rows="3">{{ old('description') }}</textarea>
                                     @error('description')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                    <div class="form-text">Satış kanalında kısa özet olarak gösterilir</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="location_description" class="form-label">Konum Açıklaması</label>
+                                    <textarea class="form-control @error('location_description') is-invalid @enderror" 
+                                              id="location_description" name="location_description" rows="3">{{ old('location_description') }}</textarea>
+                                    @error('location_description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">Otel konumu hakkında detaylı bilgi</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="general_description" class="form-label">Genel Açıklama</label>
+                                    <textarea class="form-control @error('general_description') is-invalid @enderror" 
+                                              id="general_description" name="general_description" rows="4">{{ old('general_description') }}</textarea>
+                                    @error('general_description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">Otel hakkında detaylı genel bilgi</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="about" class="form-label">Hakkında</label>
+                                    <textarea class="form-control @error('about') is-invalid @enderror" 
+                                              id="about" name="about" rows="4">{{ old('about') }}</textarea>
+                                    @error('about')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">Otel hakkında ekstra bilgiler</div>
                                 </div>
                             </div>
 

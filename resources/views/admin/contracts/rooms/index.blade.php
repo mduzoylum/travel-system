@@ -214,8 +214,9 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="description" class="form-label">Açıklama</label>
-                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        <label for="room_description" class="form-label">Oda Açıklaması</label>
+                        <textarea class="form-control" id="room_description" name="room_description" rows="3"></textarea>
+                        <div class="form-text">Bu oda tipi hakkında detaylı bilgi</div>
                     </div>
                     
                     <!-- Fiyat Hesaplama -->

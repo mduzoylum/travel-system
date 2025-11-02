@@ -10,7 +10,8 @@ class Hotel extends Model
         'name', 'city', 'country', 'address', 'stars', 'min_price', 'is_contracted', 
         'description', 'supplier_id', 'accounting_code', 'external_id', 'image', 'is_active',
         'unique_id', 'country_id', 'city_id', 'sub_destination_id',
-        'latitude', 'longitude'
+        'latitude', 'longitude',
+        'location_description', 'general_description', 'about'
     ];
 
     protected static function boot()

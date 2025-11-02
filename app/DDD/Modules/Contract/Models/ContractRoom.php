@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class ContractRoom extends Model
 {
     protected $fillable = [
-        'contract_id', 'room_type', 'meal_plan', 'base_price', 'sale_price'
+        'contract_id', 'room_type', 'meal_plan', 'base_price', 'sale_price',
+        'room_description'
     ];
 
     public function contract()
