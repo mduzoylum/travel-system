@@ -32,7 +32,10 @@ class CreditController extends Controller
 
     public function create()
     {
-        $firms = Firm::where('is_active', true)->get();
+        $firms = Firm::where('is_active', true)
+            ->where('payment_type', 'credit')
+            ->whereDoesntHave('creditAccounts')
+            ->get();
         return view('admin.credits.create', compact('firms'));
     }
 
@@ -40,10 +43,16 @@ class CreditController extends Controller
     {
         $request->validate([
             'firm_id' => 'required|exists:firms,id|unique:credit_accounts,firm_id',
-            'credit_limit' => 'required|numeric|min:0',
+            'credit_limit' => 'required|numeric|min:0.01',
             'currency' => 'required|string|max:3',
             'is_active' => 'boolean'
         ]);
+
+        // Firma kredi kartlı değilse kontrolü
+        $firm = Firm::find($request->firm_id);
+        if ($firm && $firm->payment_type !== 'credit') {
+            return back()->withErrors(['firm_id' => 'Bu firma kredi kartlı çalıştığı için kredi hesabı oluşturulamaz.'])->withInput();
+        }
 
         $data = $request->all();
         $data['is_active'] = $request->has('is_active');

@@ -84,6 +84,18 @@
                                 </td>
                             </tr>
                             <tr>
+                                <th>Ödeme Tipi:</th>
+                                <td>
+                                    @if($firm->payment_type === 'credit')
+                                        <span class="badge bg-primary">Kredili Çalışma</span>
+                                    @elseif($firm->payment_type === 'credit_card')
+                                        <span class="badge bg-info">Kredi Kartı ile Ödeme</span>
+                                    @else
+                                        <span class="badge bg-secondary">Belirtilmemiş</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>Durum:</th>
                                 <td>
                                     @if($firm->is_active)
@@ -122,9 +134,15 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a href="{{ route('admin.credits.create', ['firm_id' => $firm->id]) }}" class="btn btn-primary">
-                        <i class="fas fa-credit-card"></i> Kredi Hesabı Oluştur
-                    </a>
+                    @if($firm->payment_type === 'credit')
+                        <a href="{{ route('admin.credits.create', ['firm_id' => $firm->id]) }}" class="btn btn-primary">
+                            <i class="fas fa-credit-card"></i> Kredi Hesabı Oluştur
+                        </a>
+                    @else
+                        <button type="button" class="btn btn-secondary" disabled title="Kredi kartlı firmalarda kredi hesabı oluşturulamaz">
+                            <i class="fas fa-credit-card"></i> Kredi Hesabı Oluştur
+                        </button>
+                    @endif
                     <a href="{{ route('admin.contracts.create', ['firm_id' => $firm->id]) }}" class="btn btn-success">
                         <i class="fas fa-file-contract"></i> Kontrat Oluştur
                     </a>

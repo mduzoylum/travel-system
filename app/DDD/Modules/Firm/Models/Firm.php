@@ -15,6 +15,7 @@ class Firm extends Model
         'tax_number',
         'email_domain',
         'is_active',
+        'payment_type',
         'service_fee',
         'settings',
     ];

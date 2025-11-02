@@ -60,20 +60,20 @@
                             @error('initial_balance')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <div class="form-text">Opsiyonel: Hesap oluşturulurken başlangıç bakiyesi ekleyebilirsiniz.</div>
+                            <div class="form-text">Opsiyonel: Hesap oluşturulurken başlangıç bakiyesi ekleyebilirsiniz. Kredili çalışmalarda genellikle 0'dır.</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="credit_limit" class="form-label">Kredi Limiti</label>
+                            <label for="credit_limit" class="form-label">Kredi Limiti *</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" class="form-control @error('credit_limit') is-invalid @enderror" 
-                                       id="credit_limit" name="credit_limit" value="{{ old('credit_limit', 0) }}">
+                                       id="credit_limit" name="credit_limit" value="{{ old('credit_limit', 0) }}" required>
                                 <span class="input-group-text" id="credit_limit_symbol">₺</span>
                             </div>
                             @error('credit_limit')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <div class="form-text">Opsiyonel: Maksimum borç limiti belirleyebilirsiniz.</div>
+                            <div class="form-text">Kredili firmalar için zorunludur: Maksimum borç limiti belirleyiniz.</div>
                         </div>
                     </div>
 

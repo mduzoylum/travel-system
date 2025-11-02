@@ -29,6 +29,7 @@ class FirmController extends Controller
             'tax_number' => 'nullable|string|max:50',
             'contact_person' => 'nullable|string|max:255',
             'email_domain' => 'nullable|string|max:100',
+            'payment_type' => 'required|in:credit,credit_card',
             'service_fee' => 'nullable|numeric|min:0',
             'is_active' => 'nullable|in:on,1,true'
         ], [
@@ -39,6 +40,8 @@ class FirmController extends Controller
             'tax_number.max' => 'Vergi numarası en fazla 50 karakter olabilir.',
             'contact_person.max' => 'İletişim kişisi adı en fazla 255 karakter olabilir.',
             'email_domain.max' => 'E-posta domaini en fazla 100 karakter olabilir.',
+            'payment_type.required' => 'Ödeme tipi zorunludur.',
+            'payment_type.in' => 'Geçerli bir ödeme tipi seçiniz (Kredili Çalışma veya Kredi Kartı ile Ödeme).',
             'service_fee.numeric' => 'Hizmet bedeli sayı olmalıdır.',
             'service_fee.min' => 'Hizmet bedeli 0\'dan küçük olamaz.'
         ]);
@@ -73,6 +76,7 @@ class FirmController extends Controller
             'tax_number' => 'nullable|string|max:50',
             'contact_person' => 'nullable|string|max:255',
             'email_domain' => 'nullable|string|max:100',
+            'payment_type' => 'required|in:credit,credit_card',
             'service_fee' => 'nullable|numeric|min:0',
             'is_active' => 'nullable|in:on,1,true'
         ], [
@@ -83,6 +87,8 @@ class FirmController extends Controller
             'tax_number.max' => 'Vergi numarası en fazla 50 karakter olabilir.',
             'contact_person.max' => 'İletişim kişisi adı en fazla 255 karakter olabilir.',
             'email_domain.max' => 'E-posta domaini en fazla 100 karakter olabilir.',
+            'payment_type.required' => 'Ödeme tipi zorunludur.',
+            'payment_type.in' => 'Geçerli bir ödeme tipi seçiniz (Kredili Çalışma veya Kredi Kartı ile Ödeme).',
             'service_fee.numeric' => 'Hizmet bedeli sayı olmalıdır.',
             'service_fee.min' => 'Hizmet bedeli 0\'dan küçük olamaz.'
         ]);

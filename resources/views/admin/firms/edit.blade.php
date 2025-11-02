@@ -117,6 +117,22 @@
                 
                 <div class="col-md-4">
                     <div class="mb-3">
+                        <label for="payment_type" class="form-label">Ödeme Tipi *</label>
+                        <select class="form-select @error('payment_type') is-invalid @enderror" 
+                                id="payment_type" name="payment_type" required>
+                            <option value="credit" {{ old('payment_type', $firm->payment_type ?? 'credit') == 'credit' ? 'selected' : '' }}>Kredili Çalışma</option>
+                            <option value="credit_card" {{ old('payment_type', $firm->payment_type ?? 'credit') == 'credit_card' ? 'selected' : '' }}>Kredi Kartı ile Ödeme</option>
+                        </select>
+                        @error('payment_type')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
                         <label for="is_active" class="form-label">Durum</label>
                         <select class="form-select @error('is_active') is-invalid @enderror" 
                                 id="is_active" name="is_active">
