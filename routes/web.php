@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\FirmController;
 use App\Http\Controllers\Admin\ApprovalController;
 use App\Http\Controllers\Admin\ProfitController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\SupplierPaymentController;
 use App\Http\Controllers\ApprovalController as PublicApprovalController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
@@ -64,6 +65,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('credits/{creditAccount}/add-credit', [CreditController::class, 'addCredit'])->name('credits.add-credit');
     Route::post('credits/{creditAccount}/use-credit', [CreditController::class, 'useCredit'])->name('credits.use-credit');
     Route::get('credits/{creditAccount}/transactions', [CreditController::class, 'transactions'])->name('credits.transactions');
+    
+    // Supplier Payments
+    Route::get('supplier-payments', [SupplierPaymentController::class, 'index'])->name('supplier-payments.index');
+    Route::put('supplier-payments/{supplierPayment}/status', [SupplierPaymentController::class, 'updateStatus'])->name('supplier-payments.update-status');
     
     // Firms
     Route::resource('firms', FirmController::class);

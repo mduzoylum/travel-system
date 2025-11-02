@@ -65,4 +65,14 @@ class Hotel extends Model
         return $this->belongsTo(Destination::class, 'sub_destination_id');
     }
 
+    public function supplierPayments()
+    {
+        return $this->hasMany(SupplierPayment::class);
+    }
+
+    public function pendingSupplierPayments()
+    {
+        return $this->hasMany(SupplierPayment::class)->where('status', 'pending');
+    }
+
 }
