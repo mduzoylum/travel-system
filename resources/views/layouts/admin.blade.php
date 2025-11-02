@@ -197,6 +197,8 @@
                                 <li><a class="dropdown-item" href="{{ route('admin.contracts.index') }}"><i class="fas fa-handshake"></i> Kontratlar</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.suppliers.index') }}"><i class="fas fa-truck"></i> Tedarikçiler</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.supplier-groups.index') }}"><i class="fas fa-layer-group"></i> Tedarikçi Grupları</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.supplier-payments.index') }}"><i class="fas fa-money-bill-wave"></i> Tedarikçi Ödemeleri</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
