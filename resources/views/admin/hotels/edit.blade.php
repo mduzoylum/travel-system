@@ -241,6 +241,57 @@
                             </div>
                         </div>
 
+                        <!-- Ödeme Bilgileri (Sadece Tedarikçi Olmayan Oteller İçin) -->
+                        <div class="row" id="payment_section">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Ödeme Bilgileri</h5>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="payment_type" class="form-label">Ödeme Tipi</label>
+                                    <select class="form-select @error('payment_type') is-invalid @enderror" 
+                                            id="payment_type" name="payment_type">
+                                        <option value="">Seçiniz</option>
+                                        <option value="cari" {{ old('payment_type', $hotel->payment_type) == 'cari' ? 'selected' : '' }}>Cari</option>
+                                        <option value="credit_card" {{ old('payment_type', $hotel->payment_type) == 'credit_card' ? 'selected' : '' }}>Kredi Kartı</option>
+                                    </select>
+                                    @error('payment_type')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">Sadece tedarikçisiz oteller için geçerlidir</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="payment_period_type" class="form-label">Ödeme Periyodu Tipi</label>
+                                    <select class="form-select @error('payment_period_type') is-invalid @enderror" 
+                                            id="payment_period_type" name="payment_period_type">
+                                        <option value="">Seçiniz</option>
+                                        <option value="days_before_checkin" {{ old('payment_period_type', $hotel->payment_period_type) == 'days_before_checkin' ? 'selected' : '' }}>Rezervasyondan X Gün Önce</option>
+                                        <option value="days_after_checkin" {{ old('payment_period_type', $hotel->payment_period_type) == 'days_after_checkin' ? 'selected' : '' }}>Rezervasyondan X Gün Sonra</option>
+                                        <option value="specific_day_of_month" {{ old('payment_period_type', $hotel->payment_period_type) == 'specific_day_of_month' ? 'selected' : '' }}>Ayın Belirli Günü</option>
+                                    </select>
+                                    @error('payment_period_type')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="payment_period_value" class="form-label">Periyot Değeri</label>
+                                    <input type="number" min="1" class="form-control @error('payment_period_value') is-invalid @enderror" 
+                                           id="payment_period_value" name="payment_period_value" value="{{ old('payment_period_value', $hotel->payment_period_value) }}" 
+                                           placeholder="Gün sayısı (1-31)">
+                                    @error('payment_period_value')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text" id="period_value_help">Gün sayısı veya ayın günü (1-31)</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-end">
                             <a href="{{ route('admin.hotels.index') }}" class="btn btn-secondary me-2">İptal</a>
                             <button type="submit" class="btn btn-primary">
@@ -331,6 +382,48 @@ document.addEventListener('DOMContentLoaded', function() {
     @if($hotel->country_id)
         countrySelect.dispatchEvent(new Event('change'));
     @endif
+    
+    // Tedarikçi seçimine göre ödeme bölümünü göster/gizle
+    const supplierSelect = document.getElementById('supplier_id');
+    const paymentSection = document.getElementById('payment_section');
+    
+    function togglePaymentSection() {
+        if (supplierSelect.value === '') {
+            paymentSection.style.display = 'block';
+        } else {
+            paymentSection.style.display = 'none';
+        }
+    }
+    
+    supplierSelect.addEventListener('change', togglePaymentSection);
+    togglePaymentSection(); // İlk yüklemede kontrol et
+    
+    // Ödeme periyodu tipine göre yardım metnini değiştir
+    const periodTypeSelect = document.getElementById('payment_period_type');
+    const periodValueHelp = document.getElementById('period_value_help');
+    
+    periodTypeSelect.addEventListener('change', function() {
+        const type = this.value;
+        const periodValueInput = document.getElementById('payment_period_value');
+        
+        if (type === 'days_before_checkin') {
+            periodValueHelp.textContent = 'Rezervasyondan kaç gün önce ödeme alınacağını girin';
+            periodValueInput.placeholder = 'Örn: 7 (1 hafta önce)';
+            periodValueInput.max = '365';
+        } else if (type === 'days_after_checkin') {
+            periodValueHelp.textContent = 'Rezervasyondan kaç gün sonra ödeme alınacağını girin';
+            periodValueInput.placeholder = 'Örn: 30 (1 ay sonra)';
+            periodValueInput.max = '365';
+        } else if (type === 'specific_day_of_month') {
+            periodValueHelp.textContent = 'Ayın kaçıncı günü ödeme alınacağını girin';
+            periodValueInput.placeholder = 'Örn: 15 (ayın 15\'i)';
+            periodValueInput.max = '31';
+        } else {
+            periodValueHelp.textContent = 'Gün sayısı veya ayın günü (1-31)';
+            periodValueInput.placeholder = 'Gün sayısı (1-31)';
+            periodValueInput.max = '';
+        }
+    });
 });
 </script>
 @endpush
